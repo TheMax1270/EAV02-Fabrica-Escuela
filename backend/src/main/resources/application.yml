@@ -1,6 +1,8 @@
 spring:
   application:
     name: eav02-backend
+  autoconfigure:
+    exclude: org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -13,3 +15,6 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+logging:
+  level:
+    org.springframework.web.servlet.mvc.method.annotation: INFO
