@@ -3,6 +3,7 @@ package com.eav02.backend.auth.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -19,16 +20,31 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.security.core.authority.FactorGrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.eav02.backend.auth.dto.RegistrationRequest;
 import com.eav02.backend.auth.dto.RegistrationResponse;
+import com.eav02.backend.auth.dto.LoginResponse;
+import com.eav02.backend.auth.dto.MeResponse;
+import com.eav02.backend.auth.dto.LoginRequest;
+import com.eav02.backend.auth.service.AuthService;
 import com.eav02.backend.auth.service.RegistrationService;
+import com.eav02.backend.common.exception.AccountDisabledException;
 import com.eav02.backend.common.exception.DuplicateUserException;
 import com.eav02.backend.common.exception.GlobalExceptionHandler;
+import com.eav02.backend.common.exception.InvalidCredentialsException;
+import com.eav02.backend.common.exception.InvalidRefreshTokenException;
 import com.eav02.backend.common.exception.PasswordMismatchException;
 import com.eav02.backend.common.security.SecurityConfig;
+import com.eav02.backend.common.security.SessionJwtAuthenticationConverter;
 import com.eav02.backend.user.entity.UserRole;
 
 @WebMvcTest(AuthController.class)
@@ -40,6 +56,15 @@ class AuthControllerTest {
 
     @MockitoBean
     private RegistrationService service;
+
+    @MockitoBean
+    private AuthService authService;
+
+    @MockitoBean
+    private JwtDecoder decoder;
+
+    @MockitoBean
+    private SessionJwtAuthenticationConverter sessionConverter;
 
     @Test
     void registersWithoutAuthenticationOrCsrfToken() throws Exception {
@@ -187,7 +212,98 @@ class AuthControllerTest {
     @Test
     void deniesOtherEndpoints() throws Exception {
         mvc.perform(get("/api/v1/auth/register"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void logsInAndReturnsOnlyPublicUserData() throws Exception {
+        var user = new MeResponse(UUID.randomUUID(), "ada", UserRole.DEVELOPER, true);
+        when(authService.login(any(LoginRequest.class)))
+                .thenReturn(new LoginResponse("access", "refresh", "Bearer", 900, user));
+
+        mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"identifier\":\"ada\",\"password\":\"secret123\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.accessToken").value("access"))
+                .andExpect(jsonPath("$.refreshToken").value("refresh"))
+                .andExpect(jsonPath("$.expiresIn").value(900))
+                .andExpect(jsonPath("$.user.username").value("ada"))
+                .andExpect(jsonPath("$.user.passwordHash").doesNotExist());
+    }
+
+    @Test
+    void wrongCredentialsHaveGenericResponse() throws Exception {
+        when(authService.login(any(LoginRequest.class))).thenThrow(new InvalidCredentialsException());
+        mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"identifier\":\"ada\",\"password\":\"wrong\"}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("INVALID_CREDENTIALS"));
+    }
+
+    @Test
+    void disabledAccountReturnsForbidden() throws Exception {
+        when(authService.login(any(LoginRequest.class))).thenThrow(new AccountDisabledException());
+        mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"identifier\":\"ada\",\"password\":\"secret123\"}"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value("ACCOUNT_DISABLED"));
+    }
+
+    @Test
+    void meWithoutTokenIsUnauthorized() throws Exception {
+        mvc.perform(get("/api/v1/auth/me")).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void meWithValidTokenReturnsCurrentUser() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID sid = UUID.randomUUID();
+        Jwt jwt = Jwt.withTokenValue("valid").header("alg", "HS256")
+                .subject(userId.toString()).claim("sid", sid.toString()).build();
+        when(decoder.decode("valid")).thenReturn(jwt);
+        when(sessionConverter.convert(jwt))
+                .thenReturn(new JwtAuthenticationToken(jwt,
+                        java.util.List.of(new SimpleGrantedAuthority(FactorGrantedAuthority.BEARER_AUTHORITY))));
+        when(authService.me(sid, userId)).thenReturn(new MeResponse(userId, "ada", UserRole.DEVELOPER, true));
+
+        mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer valid"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value("ada"))
+                .andExpect(jsonPath("$.role").value("DEVELOPER"));
+    }
+
+    @Test
+    void revokedSessionBearerIsUnauthorized() throws Exception {
+        Jwt jwt = Jwt.withTokenValue("revoked").header("alg", "HS256")
+                .subject(UUID.randomUUID().toString()).claim("sid", UUID.randomUUID().toString()).build();
+        when(decoder.decode("revoked")).thenReturn(jwt);
+        when(sessionConverter.convert(jwt))
+                .thenThrow(new OAuth2AuthenticationException(new OAuth2Error("invalid_token")));
+        mvc.perform(get("/api/v1/auth/me").header("Authorization", "Bearer revoked"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void refreshAndLogoutExposeExpectedStatuses() throws Exception {
+        var user = new MeResponse(UUID.randomUUID(), "ada", UserRole.DEVELOPER, true);
+        when(authService.refresh("old")).thenReturn(new LoginResponse("new-access", "new-refresh", "Bearer", 900, user));
+        mvc.perform(post("/api/v1/auth/refresh").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"refreshToken\":\"old\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.refreshToken").value("new-refresh"));
+        mvc.perform(post("/api/v1/auth/logout").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"refreshToken\":\"new-refresh\"}"))
+                .andExpect(status().isNoContent());
+        verify(authService).logout("new-refresh");
+    }
+
+    @Test
+    void rejectedRefreshReturnsUnauthorized() throws Exception {
+        when(authService.refresh("old")).thenThrow(new InvalidRefreshTokenException());
+        mvc.perform(post("/api/v1/auth/refresh").contentType(MediaType.APPLICATION_JSON)
+                .content("{\"refreshToken\":\"old\"}"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("INVALID_TOKEN"));
     }
 
     private String validJson() {

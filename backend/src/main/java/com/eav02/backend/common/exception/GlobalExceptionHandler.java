@@ -14,6 +14,24 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(InvalidCredentialsException.class)
+    ResponseEntity<ApiError> invalidCredentials(InvalidCredentialsException failure) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiError("INVALID_CREDENTIALS",
+                "Credenciales invalidas", Map.of()));
+    }
+
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    ResponseEntity<ApiError> invalidRefreshToken(InvalidRefreshTokenException failure) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiError("INVALID_TOKEN",
+                "Token invalido", Map.of()));
+    }
+
+    @ExceptionHandler(AccountDisabledException.class)
+    ResponseEntity<ApiError> accountDisabled(AccountDisabledException failure) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError("ACCOUNT_DISABLED",
+                "La cuenta no esta habilitada", Map.of()));
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     ResponseEntity<ApiError> invalidJson(HttpMessageNotReadableException failure) {
         return ResponseEntity.badRequest().body(new ApiError("INVALID_JSON", "Solicitud JSON invalida", Map.of()));
