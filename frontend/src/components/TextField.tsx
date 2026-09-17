@@ -9,6 +9,7 @@ type TextFieldProps = {
   type?: HTMLInputTypeAttribute
   error?: string
   maxLength?: number
+  disabled?: boolean
 }
 
 export default function TextField({
@@ -20,6 +21,7 @@ export default function TextField({
   type = 'text',
   error,
   maxLength,
+  disabled = false,
 }: TextFieldProps) {
   return (
     <div className="form-field">
@@ -34,6 +36,7 @@ export default function TextField({
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${name}-error` : undefined}
         maxLength={maxLength}
+        disabled={disabled}
         required
       />
       {error && <p className="field-error" id={`${name}-error`}>{error}</p>}

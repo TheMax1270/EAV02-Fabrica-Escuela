@@ -3,6 +3,7 @@ import axios from 'axios'
 import { Link } from 'react-router-dom'
 import { registerUser, type ApiErrorResponse, type RegistrationPayload } from '../api/auth'
 import TextField from '../components/TextField'
+import SiteHeader from '../components/SiteHeader'
 
 type FieldName = keyof RegistrationPayload
 type FieldErrors = Partial<Record<FieldName, string>>
@@ -124,13 +125,12 @@ export default function RegisterPage() {
 
   return (
     <div className="app-shell">
-      <header className="site-header">
-        <Link className="brand" to="/">EAV02</Link>
-        <Link className="nav-link" to="/">Inicio</Link>
-      </header>
-      <main className="register-main">
-        <div className="register-content">
-          <h1>Crear cuenta</h1>
+      <SiteHeader />
+      <main className="auth-main">
+        <section className="auth-panel" aria-labelledby="register-title">
+          <p className="eyebrow">ÚNETE A DEVCONNECT</p>
+          <h1 id="register-title">Crear cuenta</h1>
+          <p className="auth-intro">Únete a la comunidad de desarrolladores.</p>
           {createdUsername && (
             <p className="success-message" role="status">
               Cuenta creada para <strong>{createdUsername}</strong>.
@@ -141,25 +141,26 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} noValidate aria-busy={isSubmitting}>
             <TextField name="fullName" label="Nombre completo" autoComplete="name"
               value={values.fullName} onChange={(value) => updateField('fullName', value)}
-              error={errors.fullName} maxLength={150} />
+              error={errors.fullName} maxLength={150} disabled={isSubmitting} />
             <TextField name="username" label="Nombre de usuario" autoComplete="username"
               value={values.username} onChange={(value) => updateField('username', value)}
-              error={errors.username} maxLength={50} />
+              error={errors.username} maxLength={50} disabled={isSubmitting} />
             <TextField name="email" label="Correo electrónico" type="email" autoComplete="email"
               value={values.email} onChange={(value) => updateField('email', value)}
-              error={errors.email} maxLength={254} />
+              error={errors.email} maxLength={254} disabled={isSubmitting} />
             <TextField name="password" label="Contraseña" type="password" autoComplete="new-password"
               value={values.password} onChange={(value) => updateField('password', value)}
-              error={errors.password} />
+              error={errors.password} disabled={isSubmitting} />
             <TextField name="passwordConfirmation" label="Confirmar contraseña" type="password"
               autoComplete="new-password" value={values.passwordConfirmation}
               onChange={(value) => updateField('passwordConfirmation', value)}
-              error={errors.passwordConfirmation} />
-            <button className="submit-button" type="submit" disabled={isSubmitting}>
+              error={errors.passwordConfirmation} disabled={isSubmitting} />
+            <button className="button button-primary button-full" type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'Registrando...' : 'Registrarse'}
             </button>
           </form>
-        </div>
+          <p className="auth-switch">¿Ya tienes una cuenta? <Link to="/login">Inicia sesión</Link></p>
+        </section>
       </main>
     </div>
   )
