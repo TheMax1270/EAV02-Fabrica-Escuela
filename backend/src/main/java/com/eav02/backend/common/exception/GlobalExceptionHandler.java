@@ -70,4 +70,22 @@ public class GlobalExceptionHandler {
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(new ApiError("INTERNAL_ERROR", "No se pudo completar la operacion", Map.of())));
     }
+
+    @ExceptionHandler(ProfileAlreadyExistsException.class)
+    ResponseEntity<ApiError> profileAlreadyExists(ProfileAlreadyExistsException failure) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("PROFILE_ALREADY_EXISTS",
+                "El usuario ya tiene un perfil tecnico", Map.of()));
+    }
+
+    @ExceptionHandler(ProfileNotFoundException.class)
+    ResponseEntity<ApiError> profileNotFound(ProfileNotFoundException failure) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError("PROFILE_NOT_FOUND",
+                "Perfil tecnico no encontrado", Map.of()));
+    }
+
+    @ExceptionHandler(ProfileOwnershipException.class)
+    ResponseEntity<ApiError> profileOwnership(ProfileOwnershipException failure) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError("PROFILE_FORBIDDEN",
+                "No puedes editar el perfil de otro usuario", Map.of()));
+    }
 }
