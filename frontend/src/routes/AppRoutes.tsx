@@ -1,15 +1,10 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import HomePage from '../pages/HomePage'
 import RegisterPage from '../pages/RegisterPage'
 import LoginPage from '../pages/LoginPage'
 import AccountPage from '../pages/AccountPage'
 import ProfilePage from '../pages/ProfilePage'
-import { useAuth } from '../context/useAuth'
-
-function ProtectedAccount() {
-  const { isAuthenticated } = useAuth()
-  return isAuthenticated ? <AccountPage /> : <Navigate to="/login" replace />
-}
+import ProtectedRoute from '../components/ProtectedRoute'
 
 export default function AppRoutes() {
   return (
@@ -17,13 +12,8 @@ export default function AppRoutes() {
       <Route path="/" element={<HomePage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/account" element={<ProtectedAccount />} />
-      <Route path="/profile" element={<ProtectedProfile />} />
+      <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
     </Routes>
   )
-}
-
-function ProtectedProfile() {
-  const { isAuthenticated } = useAuth()
-  return isAuthenticated ? <ProfilePage /> : <Navigate to="/login" replace />
 }
