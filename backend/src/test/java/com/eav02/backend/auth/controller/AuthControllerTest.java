@@ -37,6 +37,7 @@ import com.eav02.backend.auth.dto.MeResponse;
 import com.eav02.backend.auth.dto.LoginRequest;
 import com.eav02.backend.auth.service.AuthService;
 import com.eav02.backend.auth.service.RegistrationService;
+import com.eav02.backend.auth.service.TokenService;
 import com.eav02.backend.common.exception.AccountDisabledException;
 import com.eav02.backend.common.exception.DuplicateUserException;
 import com.eav02.backend.common.exception.GlobalExceptionHandler;
@@ -62,6 +63,9 @@ class AuthControllerTest {
 
     @MockitoBean
     private JwtDecoder decoder;
+
+    @MockitoBean
+    private TokenService tokenService;
 
     @MockitoBean
     private SessionJwtAuthenticationConverter sessionConverter;
