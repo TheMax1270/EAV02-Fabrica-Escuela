@@ -87,4 +87,16 @@ public class AppUser {
     public Instant getCreatedAt() {
         return createdAt;
     }
+
+    public AccountStatus getStatus() {
+        return AccountStatus.of(enabled);
+    }
+
+    public void suspend() {
+        enabled = false;
+    }
+
+    public void reactivate() {
+        enabled = true;
+    }
 }
