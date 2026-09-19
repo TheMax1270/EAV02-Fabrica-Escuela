@@ -3,6 +3,7 @@ import HomePage from '../pages/HomePage'
 import RegisterPage from '../pages/RegisterPage'
 import LoginPage from '../pages/LoginPage'
 import AccountPage from '../pages/AccountPage'
+import ProfilePage from '../pages/ProfilePage'
 import { useAuth } from '../context/useAuth'
 
 function ProtectedAccount() {
@@ -17,6 +18,12 @@ export default function AppRoutes() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/account" element={<ProtectedAccount />} />
+      <Route path="/profile" element={<ProtectedProfile />} />
     </Routes>
   )
+}
+
+function ProtectedProfile() {
+  const { isAuthenticated } = useAuth()
+  return isAuthenticated ? <ProfilePage /> : <Navigate to="/login" replace />
 }
