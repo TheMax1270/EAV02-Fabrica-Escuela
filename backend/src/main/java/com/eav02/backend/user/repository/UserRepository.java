@@ -3,6 +3,8 @@ package com.eav02.backend.user.repository;
 import java.util.UUID;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,4 +21,6 @@ public interface UserRepository extends JpaRepository<AppUser, UUID> {
 
     @Query("select count(u) > 0 from AppUser u where lower(u.username) = :username")
     boolean existsByUsernameNormalized(@Param("username") String username);
+
+    Page<AppUser> findAllByEnabled(boolean enabled, Pageable pageable);
 }

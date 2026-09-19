@@ -23,7 +23,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "developer_profiles")
+@Table(name = "developer_profiles", schema = "profiles")
 public class DeveloperProfile {
 
     @Id

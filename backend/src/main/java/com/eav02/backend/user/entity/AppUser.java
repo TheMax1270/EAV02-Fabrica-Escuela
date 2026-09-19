@@ -13,7 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "app_users")
+@Table(name = "app_users", schema = "users")
 public class AppUser {
 
     @Id
@@ -86,5 +86,17 @@ public class AppUser {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public AccountStatus getStatus() {
+        return AccountStatus.of(enabled);
+    }
+
+    public void suspend() {
+        enabled = false;
+    }
+
+    public void reactivate() {
+        enabled = true;
     }
 }

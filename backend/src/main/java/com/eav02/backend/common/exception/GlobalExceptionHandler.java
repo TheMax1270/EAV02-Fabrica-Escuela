@@ -10,6 +10,8 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import jakarta.validation.ConstraintViolationException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -87,5 +89,39 @@ public class GlobalExceptionHandler {
     ResponseEntity<ApiError> profileOwnership(ProfileOwnershipException failure) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError("PROFILE_FORBIDDEN",
                 "No puedes editar el perfil de otro usuario", Map.of()));
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    ResponseEntity<ApiError> userNotFound(UserNotFoundException failure) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError("USER_NOT_FOUND",
+                "Usuario no encontrado", Map.of()));
+    }
+
+    @ExceptionHandler(UserStatusConflictException.class)
+    ResponseEntity<ApiError> userStatusConflict(UserStatusConflictException failure) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("USER_STATUS_CONFLICT",
+                failure.getMessage(), Map.of("status", failure.getCurrentStatus().name())));
+    }
+
+    @ExceptionHandler(SelfSuspensionException.class)
+    ResponseEntity<ApiError> selfSuspension(SelfSuspensionException failure) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("SELF_SUSPENSION_FORBIDDEN",
+                "No puedes suspender tu propia cuenta", Map.of()));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    ResponseEntity<ApiError> constraintViolation(ConstraintViolationException failure) {
+        Map<String, String> errors = new LinkedHashMap<>();
+        failure.getConstraintViolations().forEach(violation -> {
+            String path = violation.getPropertyPath().toString();
+            errors.putIfAbsent(path.substring(path.lastIndexOf('.') + 1), violation.getMessage());
+        });
+        return ResponseEntity.badRequest().body(new ApiError("VALIDATION_ERROR", "Datos invalidos", errors));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    ResponseEntity<ApiError> typeMismatch(MethodArgumentTypeMismatchException failure) {
+        return ResponseEntity.badRequest().body(new ApiError("VALIDATION_ERROR", "Datos invalidos",
+                Map.of(failure.getName(), "Valor invalido")));
     }
 }
