@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { getCurrentUser, type AuthUser } from '../api/auth'
 import SiteHeader from '../components/SiteHeader'
 import { useAuth } from '../context/useAuth'
+import { Link } from 'react-router-dom'
 
 const roleLabels: Record<AuthUser['role'], string> = {
   DEVELOPER: 'Desarrollador',
@@ -68,6 +69,7 @@ export default function AccountPage() {
               <span>Rol en la comunidad</span>
               <strong>{roleLabels[current.role]}</strong>
             </div>
+            <Link className="button button-secondary" to="/profile">Crear o editar perfil técnico</Link>
             <button className="button button-secondary" type="button" onClick={() => void logout()}
               disabled={isLoggingOut}>
               {isLoggingOut ? 'Cerrando sesión...' : 'Cerrar sesión'}
