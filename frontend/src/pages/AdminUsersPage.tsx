@@ -19,6 +19,11 @@ const statusLabels: Record<AccountStatus, string> = {
 
 type StatusFilter = AccountStatus | 'ALL'
 
+type StatusDialog = {
+  user: AdminUser
+  action: 'suspend' | 'reactivate'
+}
+
 function formatDate(value: string) {
   return new Date(value).toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: 'numeric' })
 }
@@ -41,6 +46,7 @@ export default function AdminUsersPage() {
   const [pendingId, setPendingId] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
   const [actionMessage, setActionMessage] = useState<string | null>(null)
+  const [statusDialog, setStatusDialog] = useState<StatusDialog | null>(null)
 
   const retry = useCallback(() => {
     setIsLoading(true)
@@ -83,18 +89,27 @@ export default function AdminUsersPage() {
       : current)
   }
 
-  async function changeStatus(target: AdminUser) {
+  function requestStatusChange(target: AdminUser) {
     if (pendingId) return
     const suspending = target.status === 'ACTIVE'
-    if (suspending && !window.confirm(`¿Suspender la cuenta de ${target.username}? No podrá iniciar sesión hasta que la reactives.`)) {
-      return
-    }
+    setStatusDialog({ user: target, action: suspending ? 'suspend' : 'reactivate' })
+  }
+
+  function closeStatusDialog() {
+    if (!pendingId) setStatusDialog(null)
+  }
+
+  async function confirmStatusChange() {
+    if (!statusDialog || pendingId) return
+    const target = statusDialog.user
+    const suspending = statusDialog.action === 'suspend'
     setPendingId(target.id)
     setActionError(null)
     setActionMessage(null)
     try {
       const updated = suspending ? await suspendUser(target.id) : await reactivateUser(target.id)
       replaceUser(updated)
+      setStatusDialog(null)
       setActionMessage(suspending
         ? `La cuenta de ${updated.username} fue suspendida.`
         : `La cuenta de ${updated.username} fue reactivada.`)
@@ -107,8 +122,20 @@ export default function AdminUsersPage() {
     }
   }
 
+  useEffect(() => {
+    if (!statusDialog) return undefined
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape' && !pendingId) setStatusDialog(null)
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [statusDialog, pendingId])
+
   const totalPages = data?.totalPages ?? 0
   const hasRows = Boolean(data && data.content.length > 0)
+  const dialogIsSuspension = statusDialog?.action === 'suspend'
 
   return (
     <div className="app-shell">
@@ -181,7 +208,7 @@ export default function AdminUsersPage() {
                         <td>{formatDate(row.createdAt)}</td>
                         <td className="admin-actions">
                           <button className={`button ${suspending ? 'button-danger' : 'button-secondary'}`} type="button"
-                            onClick={() => void changeStatus(row)}
+                            onClick={() => requestStatusChange(row)}
                             disabled={Boolean(pendingId) || (isSelf && suspending)}
                             title={isSelf && suspending ? 'No puedes suspender tu propia cuenta' : undefined}>
                             {isPending ? 'Guardando...' : suspending ? 'Suspender' : 'Reactivar'}
@@ -207,6 +234,32 @@ export default function AdminUsersPage() {
           </>
         )}
       </main>
+
+      {statusDialog && (
+        <div className="modal-overlay" role="presentation">
+          <div className="confirm-modal" role="dialog" aria-modal="true"
+            aria-labelledby="status-dialog-title" aria-describedby="status-dialog-description">
+            <h2 id="status-dialog-title">
+              {dialogIsSuspension ? 'Suspender cuenta' : 'Reactivar cuenta'}
+            </h2>
+            <p id="status-dialog-description">
+              {dialogIsSuspension
+                ? `¿Deseas suspender la cuenta de ${statusDialog.user.username}? El usuario no podrá iniciar sesión hasta que la reactives.`
+                : `¿Deseas reactivar la cuenta de ${statusDialog.user.username}? El usuario podrá volver a iniciar sesión.`}
+            </p>
+            <div className="confirm-modal-actions">
+              <button className="button button-secondary" type="button" onClick={closeStatusDialog}
+                disabled={Boolean(pendingId)} autoFocus>
+                Cancelar
+              </button>
+              <button className={`button ${dialogIsSuspension ? 'button-danger' : 'button-primary'}`} type="button"
+                onClick={() => void confirmStatusChange()} disabled={Boolean(pendingId)}>
+                {pendingId ? 'Guardando...' : dialogIsSuspension ? 'Suspender' : 'Reactivar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
