@@ -46,6 +46,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/profile/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/profiles/**").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/profiles/**").authenticated()
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .anyRequest().denyAll())
                 .build();
     }
