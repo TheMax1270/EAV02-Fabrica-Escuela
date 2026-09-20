@@ -41,9 +41,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/logout").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/projects").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/me").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/projects/me").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/projects/**").authenticated()
 
                         .requestMatchers("/api/v1/profile/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/projects/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/profiles/**").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/profiles/**").authenticated()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
