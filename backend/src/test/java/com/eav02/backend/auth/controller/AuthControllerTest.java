@@ -5,7 +5,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -233,6 +235,19 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.expiresIn").value(900))
                 .andExpect(jsonPath("$.user.username").value("ada"))
                 .andExpect(jsonPath("$.user.passwordHash").doesNotExist());
+    }
+
+    @Test
+    void allowsLoginPreflightFromProductionFrontend() throws Exception {
+        mvc.perform(options("/api/v1/auth/login")
+                .header("Origin", "https://eav-02-fabrica-escuela.vercel.app")
+                .header("Access-Control-Request-Method", "POST")
+                .header("Access-Control-Request-Headers", "content-type"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Access-Control-Allow-Origin",
+                        "https://eav-02-fabrica-escuela.vercel.app"))
+                .andExpect(header().string("Access-Control-Allow-Methods",
+                        org.hamcrest.Matchers.containsString("POST")));
     }
 
     @Test
