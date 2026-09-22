@@ -21,7 +21,7 @@ import com.eav02.backend.user.entity.AppUser;
 import com.eav02.backend.user.repository.UserRepository;
 
 @Service
-public class AdminUserService {
+public class AdminUserService implements IAdminUserService {
 
     private final UserRepository users;
     private final AdminAuditService audit;
