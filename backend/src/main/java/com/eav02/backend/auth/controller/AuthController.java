@@ -16,8 +16,8 @@ import com.eav02.backend.auth.dto.LoginResponse;
 import com.eav02.backend.auth.dto.RefreshRequest;
 import com.eav02.backend.auth.dto.LogoutRequest;
 import com.eav02.backend.auth.dto.MeResponse;
-import com.eav02.backend.auth.service.AuthService;
-import com.eav02.backend.auth.service.RegistrationService;
+import com.eav02.backend.auth.service.IAuthService;
+import com.eav02.backend.auth.service.IRegistrationService;
 
 import java.util.UUID;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,10 +28,10 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
-    private final RegistrationService registrationService;
-    private final AuthService authService;
+    private final IRegistrationService registrationService;
+    private final IAuthService authService;
 
-    public AuthController(RegistrationService registrationService, AuthService authService) {
+    public AuthController(IRegistrationService registrationService, IAuthService authService) {
         this.registrationService = registrationService;
         this.authService = authService;
     }

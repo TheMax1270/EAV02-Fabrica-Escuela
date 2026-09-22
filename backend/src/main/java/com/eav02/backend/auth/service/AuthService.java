@@ -20,7 +20,7 @@ import com.eav02.backend.user.entity.AppUser;
 import com.eav02.backend.user.repository.UserRepository;
 
 @Service
-public class AuthService {
+public class AuthService implements IAuthService {
 
     private final UserRepository users;
     private final AuthSessionRepository sessions;

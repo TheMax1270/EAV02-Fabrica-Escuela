@@ -16,7 +16,7 @@ import com.eav02.backend.profile.repository.DeveloperProfileRepository;
 import com.eav02.backend.user.repository.UserRepository;
 
 @Service
-public class ProfileService {
+public class ProfileService implements IProfileService {
 
     private final DeveloperProfileRepository profiles;
     private final UserRepository users;
