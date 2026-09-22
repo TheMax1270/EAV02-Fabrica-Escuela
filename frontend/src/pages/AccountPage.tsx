@@ -69,6 +69,7 @@ export default function AccountPage() {
               <span>Rol en la comunidad</span>
               <strong>{roleLabels[current.role]}</strong>
             </div>
+            <Link className="button button-secondary" to="/projects">Ver mis proyectos</Link>
             <Link className="button button-secondary" to="/profile">Crear o editar perfil técnico</Link>
             <button className="button button-secondary" type="button" onClick={() => void logout()}
               disabled={isLoggingOut}>

@@ -124,4 +124,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(new ApiError("VALIDATION_ERROR", "Datos invalidos",
                 Map.of(failure.getName(), "Valor invalido")));
     }
+
+    @ExceptionHandler(ProjectNotFoundException.class)
+    ResponseEntity<ApiError> projectNotFound(ProjectNotFoundException failure) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError("PROJECT_NOT_FOUND",
+            "Proyecto no encontrado", Map.of()));
+    }
+    
+    @ExceptionHandler(ProjectOwnershipException.class)
+    ResponseEntity<ApiError> projectOwnership(ProjectOwnershipException failure) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError("PROJECT_FORBIDDEN",
+            "No puedes editar el proyecto de otro usuario", Map.of()));
+    }
 }
