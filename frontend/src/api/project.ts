@@ -27,6 +27,10 @@ export async function getMyProjects(): Promise<Project[]> {
   return response.data
 }
 
+export async function getProject(projectId: string, signal?: AbortSignal): Promise<Project> {
+  return (await api.get<Project>(`/api/v1/projects/${projectId}`, { signal })).data
+}
+
 export async function updateProject(projectId: string, payload: ProjectPayload): Promise<Project> {
   const response = await api.put<Project>(`/api/v1/projects/${projectId}`, payload)
   return response.data

@@ -16,6 +16,18 @@ import jakarta.validation.ConstraintViolationException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(CommentNotFoundException.class)
+    ResponseEntity<ApiError> commentNotFound(CommentNotFoundException failure) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError("COMMENT_NOT_FOUND",
+                "Comentario no encontrado", Map.of()));
+    }
+
+    @ExceptionHandler(ReplyDepthException.class)
+    ResponseEntity<ApiError> replyDepth(ReplyDepthException failure) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("REPLY_DEPTH_EXCEEDED",
+                "Solo puedes responder a un comentario raiz", Map.of()));
+    }
+
     @ExceptionHandler(InvalidCredentialsException.class)
     ResponseEntity<ApiError> invalidCredentials(InvalidCredentialsException failure) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiError("INVALID_CREDENTIALS",
@@ -130,6 +142,25 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError("PROJECT_NOT_FOUND",
             "Proyecto no encontrado", Map.of()));
     }
+
+    @ExceptionHandler(PostNotFoundException.class)
+    ResponseEntity<ApiError> postNotFound(PostNotFoundException failure) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError("POST_NOT_FOUND",
+                "Publicacion no encontrada", Map.of()));
+    }
+
+    @ExceptionHandler(PostOwnershipException.class)
+    ResponseEntity<ApiError> postOwnership(PostOwnershipException failure) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError("POST_FORBIDDEN",
+                "Solo el autor puede realizar esta accion sobre su publicacion", Map.of()));
+    }
+
+    @ExceptionHandler(PostTypeConflictException.class)
+    ResponseEntity<ApiError> postTypeConflict(PostTypeConflictException failure) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("POST_TYPE_CONFLICT",
+                "Solo se pueden resolver discusiones tecnicas", Map.of()));
+    }
+
     
     @ExceptionHandler(ProjectOwnershipException.class)
     ResponseEntity<ApiError> projectOwnership(ProjectOwnershipException failure) {

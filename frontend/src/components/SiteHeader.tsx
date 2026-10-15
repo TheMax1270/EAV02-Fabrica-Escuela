@@ -13,6 +13,7 @@ export default function SiteHeader() {
         </Link>
         <nav className="site-nav" aria-label="Navegación principal">
           <NavLink to="/" end>Inicio</NavLink>
+          <NavLink to="/posts">Publicaciones</NavLink>
           {isAuthenticated ? (
             <>
               <NavLink to="/account">Mi cuenta</NavLink>
