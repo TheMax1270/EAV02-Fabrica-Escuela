@@ -7,11 +7,15 @@ import ProfilePage from '../pages/ProfilePage'
 import AdminUsersPage from '../pages/AdminUsersPage'
 import ProtectedRoute from '../components/ProtectedRoute'
 import MyProjectsPage from '../pages/MyProjectsPage'
+import PostsPage from '../pages/PostsPage'
+import ProjectDetailPage from '../pages/ProjectDetailPage'
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
+      <Route path="/posts" element={<PostsPage />} />
+      <Route path="/projects/:projectId" element={<ProjectDetailPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/account" element={<ProtectedRoute><AccountPage /></ProtectedRoute>} />
