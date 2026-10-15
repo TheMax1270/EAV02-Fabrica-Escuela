@@ -38,6 +38,7 @@ Completar el archivo `.env`:
 DB_URL=
 DB_USERNAME=
 DB_PASSWORD=
+JWT_SECRET=
 
 ```
 
