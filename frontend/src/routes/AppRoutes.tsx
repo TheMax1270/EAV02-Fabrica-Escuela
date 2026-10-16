@@ -9,6 +9,7 @@ import ProtectedRoute from '../components/ProtectedRoute'
 import MyProjectsPage from '../pages/MyProjectsPage'
 import PostsPage from '../pages/PostsPage'
 import ProjectDetailPage from '../pages/ProjectDetailPage'
+import DeveloperProfilePage from '../pages/DeveloperProfilePage'
 
 export default function AppRoutes() {
   return (
@@ -22,6 +23,7 @@ export default function AppRoutes() {
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="/admin/users" element={<ProtectedRoute role="ADMIN"><AdminUsersPage /></ProtectedRoute>} />
       <Route path="/projects" element={<ProtectedRoute><MyProjectsPage /></ProtectedRoute>} />
+      <Route path="/developers/:userId" element={<DeveloperProfilePage />} />
     </Routes>
   )
 }

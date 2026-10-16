@@ -167,4 +167,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError("PROJECT_FORBIDDEN",
             "No puedes editar el proyecto de otro usuario", Map.of()));
     }
+
+    @ExceptionHandler(ReportAlreadyExistsException.class)
+    ResponseEntity<ApiError> reportAlreadyExists(ReportAlreadyExistsException failure) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("REPORT_ALREADY_EXISTS",
+            "Ya tienes un reporte pendiente sobre este elemento", Map.of()));
+    }
 }

@@ -7,6 +7,8 @@ import SiteHeader from '../components/SiteHeader'
 import TextField from '../components/TextField'
 import InteractionPanel from '../components/InteractionPanel'
 import { useAuth } from '../context/useAuth'
+import ReportButton from '../components/ReportButton'
+import { reportPost } from '../api/report'
 
 const PAGE_SIZE = 20
 type FieldErrors = { title?: string; content?: string; link?: string; categories?: string }
@@ -243,7 +245,7 @@ export default function PostsPage() {
                 <article className="post-card" key={post.id}>
                   <header className="post-author">
                     <span className="post-avatar" aria-hidden="true">{post.username.charAt(0).toUpperCase()}</span>
-                    <div><span className="post-username">@{post.username}</span>
+                    <div><Link className="post-username" to={`/developers/${post.userId}`}>@{post.username}</Link>
                       <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time></div>
                   </header>
                   <div className="post-badges"><span className={`post-type post-type-${post.type === 'GENERAL' ? 'general' : 'technical'}`}>
@@ -264,6 +266,7 @@ export default function PostsPage() {
                     <button className="button button-danger post-resolve" type="button" disabled={deletingId !== null}
                       onClick={() => void handleDelete(post.id)}>{deletingId === post.id ? 'Eliminando...' : 'Eliminar'}</button>}
                   {deleteError?.id === post.id && <p className="form-error" role="alert">{deleteError.message}</p>}
+                  <ReportButton onSubmit={(payload) => reportPost(post.id, payload)} />
                   <InteractionPanel target={{ kind: 'posts', id: post.id }} />
                 </article>
               ))}
