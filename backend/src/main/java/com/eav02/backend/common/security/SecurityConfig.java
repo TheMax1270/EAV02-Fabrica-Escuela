@@ -82,6 +82,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/profiles/**").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/profiles/**").authenticated()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/posts/{id}/reports", "/api/v1/comments/{id}/reports",
+                                "/api/v1/profiles/{id}/reports").authenticated()
                         .anyRequest().denyAll())
                 .build();
     }
