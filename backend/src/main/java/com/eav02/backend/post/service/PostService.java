@@ -15,6 +15,7 @@ import com.eav02.backend.post.dto.PostPageResponse;
 import com.eav02.backend.post.dto.PostRequest;
 import com.eav02.backend.post.dto.PostResponse;
 import com.eav02.backend.post.entity.Post;
+import com.eav02.backend.moderation.entity.ModerationStatus;
 import com.eav02.backend.post.repository.PostRepository;
 import com.eav02.backend.user.repository.UserRepository;
 import com.eav02.backend.interaction.repository.CommentRepository;
@@ -48,8 +49,11 @@ public class PostService {
 
     @Transactional(readOnly = true)
     public PostResponse getById(UUID postId) {
-        return posts.findWithUserById(postId).map(PostResponse::from)
-                .orElseThrow(PostNotFoundException::new);
+        var post = posts.findWithUserById(postId).orElseThrow(PostNotFoundException::new);
+        if (post.getModerationStatus() != ModerationStatus.VISIBLE) {
+            throw new PostNotFoundException();
+        }
+        return PostResponse.from(post);
     }
 
     @Transactional

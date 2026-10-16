@@ -5,6 +5,7 @@ import java.util.UUID;
 import com.eav02.backend.user.entity.AppUser;
 import com.eav02.backend.project.entity.Project;
 import com.eav02.backend.post.entity.Post;
+import com.eav02.backend.moderation.entity.ModerationStatus;
 import jakarta.persistence.*;
 
 @Entity
@@ -29,6 +30,10 @@ public class Comment {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "moderation_status", nullable = false, length = 20)
+    private ModerationStatus moderationStatus = ModerationStatus.VISIBLE;
+
     protected Comment() {}
     public Comment(AppUser user, Project project, Post post, Comment parent, String content, Instant createdAt) {
         if ((project == null) == (post == null)) throw new IllegalArgumentException("El comentario requiere un unico destino");
@@ -51,4 +56,8 @@ public class Comment {
     public Comment getParent() { return parent; }
     public String getContent() { return content; }
     public Instant getCreatedAt() { return createdAt; }
+    public ModerationStatus getModerationStatus() { return moderationStatus; }
+    public void markInReview() { moderationStatus = ModerationStatus.IN_REVIEW; }
+    public void restore() { moderationStatus = ModerationStatus.VISIBLE; }
+    public void remove() { moderationStatus = ModerationStatus.REMOVED; }
 }

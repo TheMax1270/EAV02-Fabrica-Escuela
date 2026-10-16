@@ -48,7 +48,7 @@ public class ProfileService {
 
     @Transactional(readOnly = true)
     public ProfileResponse getPublic(UUID profileId) {
-        return profiles.findWithUserById(profileId).map(ProfileResponse::from)
+        return profiles.findPublicWithUserById(profileId).map(ProfileResponse::from)
                 .orElseThrow(ProfileNotFoundException::new);
     }
 

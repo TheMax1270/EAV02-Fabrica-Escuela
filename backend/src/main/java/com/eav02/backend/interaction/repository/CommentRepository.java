@@ -19,19 +19,19 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
     @Modifying
     @Query("delete from Comment c where c.post.id = :postId and c.parent is null")
     int deletePostRoots(@Param("postId") UUID postId);
-    @Query("select c from Comment c join fetch c.user left join fetch c.project left join fetch c.post left join fetch c.parent where c.id = :id")
+        @Query("select c from Comment c join fetch c.user left join fetch c.project left join fetch c.post left join fetch c.parent where c.id = :id")
     Optional<Comment> findWithTargetById(@Param("id") UUID id);
 
-    @Query(value = "select c from Comment c join fetch c.user where c.project.id = :id and c.parent is null",
-            countQuery = "select count(c) from Comment c where c.project.id = :id and c.parent is null")
+    @Query(value = "select c from Comment c join fetch c.user where c.project.id = :id and c.parent is null and c.moderationStatus = com.eav02.backend.moderation.entity.ModerationStatus.VISIBLE",
+            countQuery = "select count(c) from Comment c where c.project.id = :id and c.parent is null and c.moderationStatus = com.eav02.backend.moderation.entity.ModerationStatus.VISIBLE")
     Page<Comment> findProjectRoots(@Param("id") UUID id, Pageable pageable);
 
-    @Query(value = "select c from Comment c join fetch c.user where c.post.id = :id and c.parent is null",
-            countQuery = "select count(c) from Comment c where c.post.id = :id and c.parent is null")
+    @Query(value = "select c from Comment c join fetch c.user where c.post.id = :id and c.parent is null and c.moderationStatus = com.eav02.backend.moderation.entity.ModerationStatus.VISIBLE",
+            countQuery = "select count(c) from Comment c where c.post.id = :id and c.parent is null and c.moderationStatus = com.eav02.backend.moderation.entity.ModerationStatus.VISIBLE")
     Page<Comment> findPostRoots(@Param("id") UUID id, Pageable pageable);
 
-    @Query(value = "select c from Comment c join fetch c.user where c.parent.id = :id",
-            countQuery = "select count(c) from Comment c where c.parent.id = :id")
+    @Query(value = "select c from Comment c join fetch c.user where c.parent.id = :id and c.moderationStatus = com.eav02.backend.moderation.entity.ModerationStatus.VISIBLE",
+            countQuery = "select count(c) from Comment c where c.parent.id = :id and c.moderationStatus = com.eav02.backend.moderation.entity.ModerationStatus.VISIBLE")
     Page<Comment> findReplies(@Param("id") UUID id, Pageable pageable);
 
     interface ReplyCount {
