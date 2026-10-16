@@ -19,6 +19,7 @@ export default function SiteHeader() {
               <NavLink to="/account">Mi cuenta</NavLink>
               <NavLink to="/profile">Perfil técnico</NavLink>
               {user?.role === 'ADMIN' && <NavLink to="/admin/users">Usuarios</NavLink>}
+              {user?.role === 'ADMIN' && <NavLink to="/admin/reports">Reportes</NavLink>}
               <span className="nav-username" title={user?.username}>{user?.username}</span>
               <button className="nav-logout" type="button" onClick={() => void logout()}
                 disabled={isLoggingOut}>
