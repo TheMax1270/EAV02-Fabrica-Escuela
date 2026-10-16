@@ -85,6 +85,24 @@ public class GlobalExceptionHandler {
                         .body(new ApiError("INTERNAL_ERROR", "No se pudo completar la operacion", Map.of())));
     }
 
+    @ExceptionHandler(ReportNotFoundException.class)
+    ResponseEntity<ApiError> reportNotFound(ReportNotFoundException failure) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError("REPORT_NOT_FOUND",
+                "Reporte no encontrado", Map.of()));
+    }
+
+    @ExceptionHandler(ModerationTargetNotFoundException.class)
+    ResponseEntity<ApiError> moderationTargetNotFound(ModerationTargetNotFoundException failure) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError("TARGET_NOT_FOUND",
+                "El elemento reportado no existe", Map.of()));
+    }
+
+    @ExceptionHandler(ModerationStateConflictException.class)
+    ResponseEntity<ApiError> moderationStateConflict(ModerationStateConflictException failure) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("MODERATION_STATE_CONFLICT",
+                "El reporte ya fue procesado", Map.of()));
+    }
+
     @ExceptionHandler(ProfileAlreadyExistsException.class)
     ResponseEntity<ApiError> profileAlreadyExists(ProfileAlreadyExistsException failure) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("PROFILE_ALREADY_EXISTS",
