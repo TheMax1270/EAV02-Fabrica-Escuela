@@ -5,6 +5,8 @@ import { getProfileByUser, type ExperienceLevel, type Profile } from '../api/pro
 import { reportProfile } from '../api/report'
 import SiteHeader from '../components/SiteHeader'
 import ReportButton from '../components/ReportButton'
+import { profileReportStatus } from '../api/report'
+import { useAuth } from '../context/useAuth'
 
 const levelLabels: Record<ExperienceLevel, string> = {
   JUNIOR: 'Junior', SEMI_SENIOR: 'Semi senior', SENIOR: 'Senior',
@@ -12,6 +14,7 @@ const levelLabels: Record<ExperienceLevel, string> = {
 
 export default function DeveloperProfilePage() {
   const { userId } = useParams()
+  const { user } = useAuth()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [notFound, setNotFound] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -64,7 +67,8 @@ export default function DeveloperProfilePage() {
                   {profile.technologies.map((technology) => <span key={technology}>{technology}</span>)}
                 </div>
               </section>
-              <ReportButton onSubmit={(payload) => reportProfile(profile.id, payload)} />
+              {user?.id !== profile.userId && <ReportButton statusCheck={() => profileReportStatus(profile.id)}
+                onSubmit={(payload) => reportProfile(profile.id, payload)} />}
             </div>
           )}
           <p className="auth-switch"><Link to="/posts">Volver a publicaciones</Link></p>

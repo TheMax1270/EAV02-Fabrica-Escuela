@@ -48,7 +48,7 @@ public class ProfileService {
 
     @Transactional(readOnly = true)
     public ProfileResponse getPublic(UUID profileId) {
-        return profiles.findWithUserById(profileId).map(ProfileResponse::from)
+        return profiles.findPublicWithUserById(profileId).map(ProfileResponse::from)
                 .orElseThrow(ProfileNotFoundException::new);
     }
 
@@ -71,9 +71,9 @@ public class ProfileService {
 
     @Transactional(readOnly = true)
     public ProfileResponse getByUserId(UUID userId) {
-        return profiles.findByUserId(userId).map(ProfileResponse::from)
+        return profiles.findPublicByUserId(userId).map(ProfileResponse::from)
             .orElseThrow(ProfileNotFoundException::new);
-}
+    }
 
     private void update(DeveloperProfile profile, ProfileRequest request) {
         profile.update(request.biography(), request.programmingLanguages(), request.technologies(),

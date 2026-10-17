@@ -42,7 +42,7 @@ public class CommentService {
     }
     @Transactional
     public CommentResponse reply(UUID id, UUID userId, CommentRequest request) {
-        var parent = root(id);
+        var parent = comments.findWithTargetById(id).orElseThrow(CommentNotFoundException::new);
         var user = users.findById(userId).orElseThrow(UserNotFoundException::new);
         return CommentResponse.from(comments.saveAndFlush(new Comment(user, parent.getProject(), parent.getPost(), parent, request.content(), clock.instant())), 0);
     }
@@ -56,6 +56,12 @@ public class CommentService {
         if (!posts.existsById(id)) throw new PostNotFoundException();
         return response(comments.findPostRoots(id, pageable(page, size)), true);
     }
+
+    @Transactional(readOnly = true)
+    public long countPost(UUID id) {
+        if (!posts.existsById(id)) throw new PostNotFoundException();
+        return comments.countVisiblePostComments(id);
+    }
     @Transactional(readOnly = true)
     public CommentPageResponse listReplies(UUID id, int page, int size) {
         root(id);
@@ -63,7 +69,6 @@ public class CommentService {
     }
     private Comment root(UUID id) {
         var parent = comments.findWithTargetById(id).orElseThrow(CommentNotFoundException::new);
-        if (parent.getParent() != null) throw new ReplyDepthException();
         return parent;
     }
     private PageRequest pageable(int page, int size) {

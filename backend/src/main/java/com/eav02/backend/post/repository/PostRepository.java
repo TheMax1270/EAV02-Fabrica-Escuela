@@ -19,7 +19,10 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     @Query("select p from Post p join fetch p.user where p.id = :id")
     Optional<Post> findWithUserById(@Param("id") UUID id);
 
-    @Query(value = "select p from Post p join fetch p.user",
-            countQuery = "select count(p) from Post p")
+    @Query("select p from Post p join fetch p.user where p.id = :id and p.moderationStatus = com.eav02.backend.moderation.entity.ModerationStatus.VISIBLE")
+    Optional<Post> findPublicWithUserById(@Param("id") UUID id);
+
+        @Query(value = "select p from Post p join fetch p.user where p.moderationStatus = com.eav02.backend.moderation.entity.ModerationStatus.VISIBLE",
+            countQuery = "select count(p) from Post p where p.moderationStatus = com.eav02.backend.moderation.entity.ModerationStatus.VISIBLE")
     Page<Post> findAllWithUser(Pageable pageable);
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.eav02.backend.user.entity.AppUser;
+import com.eav02.backend.moderation.entity.ModerationStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -50,6 +51,10 @@ public class Post {
     @Column(nullable = false)
     private boolean resolved;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "moderation_status", nullable = false, length = 20)
+    private ModerationStatus moderationStatus = ModerationStatus.VISIBLE;
+
     @Column(nullable = false, length = 5000)
     private String content;
 
@@ -84,6 +89,11 @@ public class Post {
     public String getLink() { return link; }
     public List<String> getCategories() { return List.copyOf(categories); }
     public boolean isResolved() { return resolved; }
+    public ModerationStatus getModerationStatus() { return moderationStatus; }
+
+    public void markInReview() { moderationStatus = ModerationStatus.IN_REVIEW; }
+    public void restore() { moderationStatus = ModerationStatus.VISIBLE; }
+    public void remove() { moderationStatus = ModerationStatus.REMOVED; }
 
     public void resolve() {
         if (type != PostType.TECHNICAL_DISCUSSION) {

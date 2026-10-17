@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import com.eav02.backend.interaction.entity.Reaction;
 
+import java.util.List;
 public interface ReactionRepository extends JpaRepository<Reaction, UUID> {
     @Modifying
     @Query("delete from Reaction r where r.post.id = :postId")
@@ -22,4 +23,8 @@ public interface ReactionRepository extends JpaRepository<Reaction, UUID> {
     boolean existsByPost_IdAndUser_Id(UUID postId, UUID userId);
     long deleteByProject_IdAndUser_Id(UUID projectId, UUID userId);
     long deleteByPost_IdAndUser_Id(UUID postId, UUID userId);
+    @Query("select r.user.username from Reaction r where r.project.id = :id order by r.createdAt desc")
+    List<String> findProjectUsernames(@Param("id") UUID id);
+    @Query("select r.user.username from Reaction r where r.post.id = :id order by r.createdAt desc")
+    List<String> findPostUsernames(@Param("id") UUID id);
 }

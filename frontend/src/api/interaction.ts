@@ -15,10 +15,13 @@ export type Comment = {
   parentCommentId: string | null; content: string; createdAt: string; replyCount: number
 }
 export type CommentPage = { content: Comment[]; page: number; size: number; totalElements: number; totalPages: number }
-export type LikeSummary = { likeCount: number; likedByMe: boolean | null }
+export type LikeSummary = { likeCount: number; likedByMe: boolean | null; usernames: string[] }
 export function targetPath(target: Target) { return `/api/v1/${target.kind}/${target.id}` }
 export async function listComments(path: string, page: number, signal?: AbortSignal) {
   return (await api.get<CommentPage>(path, { params: { page, size: 20 }, signal })).data
+}
+export async function getCommentCount(target: Target) {
+  return (await api.get<{ count: number }>(`${targetPath(target)}/comments/count`)).data.count
 }
 export async function sendComment(path: string, content: string) {
   return (await api.post<Comment>(path, { content })).data

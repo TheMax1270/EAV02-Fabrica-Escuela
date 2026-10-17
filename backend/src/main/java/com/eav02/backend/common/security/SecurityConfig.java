@@ -62,7 +62,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/logout").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/projects").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/posts/{id}/comments", "/api/v1/posts/{id}/likes",
+                        .requestMatchers(HttpMethod.GET, "/api/v1/posts/{id}/comments", "/api/v1/posts/{id}/comments/count", "/api/v1/posts/{id}/likes",
                                 "/api/v1/projects/{id}/comments", "/api/v1/projects/{id}/likes",
                                 "/api/v1/comments/{id}/replies").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/posts/{id}/comments", "/api/v1/projects/{id}/comments",
@@ -84,6 +84,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/posts/{id}/reports", "/api/v1/comments/{id}/reports",
                                 "/api/v1/profiles/{id}/reports").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/posts/{id}/reports/me", "/api/v1/comments/{id}/reports/me",
+                                "/api/v1/profiles/{id}/reports/me").authenticated()
                         .anyRequest().denyAll())
                 .build();
     }

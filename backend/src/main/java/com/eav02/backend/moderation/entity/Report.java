@@ -72,4 +72,7 @@ public class Report {
     public String getDetails() { return details; }
     public ReportStatus getStatus() { return status; }
     public Instant getCreatedAt() { return createdAt; }
+
+    public void resolve() { status = ReportStatus.RESOLVED; }
+    public void dismiss() { status = ReportStatus.DISMISSED; }
 }

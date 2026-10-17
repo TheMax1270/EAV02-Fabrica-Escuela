@@ -7,6 +7,7 @@ export default function LikeButton({ target }: { target: Target }) {
   const [summary, setSummary] = useState<LikeSummary | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [showPeople, setShowPeople] = useState(false)
   const [reload, setReload] = useState(0)
   const sending = useRef(false)
   const { kind, id } = target
@@ -30,10 +31,17 @@ export default function LikeButton({ target }: { target: Target }) {
   }
   return <div className="like-controls">
     {!summary && !error && <span role="status">Cargando Me gusta...</span>}
-    {summary && (isAuthenticated ? <button className={`button button-secondary ${summary.likedByMe ? 'like-active' : ''}`}
+    {summary && <div className="like-row">{isAuthenticated ? <button className={`like-button ${summary.likedByMe ? 'like-active' : ''}`}
       type="button" aria-pressed={Boolean(summary.likedByMe)} disabled={busy} onClick={() => void toggle()}>
-      {busy ? 'Actualizando...' : summary.likedByMe ? 'Retirar Me gusta' : 'Me gusta'} · {summary.likeCount}
-    </button> : <span>{summary.likeCount} Me gusta · <Link to="/login">Inicia sesión</Link> para reaccionar</span>)}
+      <span aria-hidden="true">♥</span> {summary.likedByMe ? 'Te gusta' : 'Me gusta'}
+    </button> : <span className="like-button login-like"><span aria-hidden="true">♥</span> Me gusta</span>}
+      <button className="like-count" type="button" disabled={summary.likeCount === 0} onClick={() => setShowPeople((value) => !value)}>
+        {summary.likeCount} {summary.likeCount === 1 ? 'Me gusta' : 'Me gusta'}
+      </button></div>}
+    {!isAuthenticated && summary && <Link className="interaction-login" to="/login">Inicia sesión para reaccionar</Link>}
+    {showPeople && summary && <div className="like-people" aria-label="Personas que dieron Me gusta">
+      {summary.usernames.length ? summary.usernames.map((username) => <span key={username}>@{username}</span>) : <span>Aún no hay reacciones.</span>}
+    </div>}
     {error && <div role="alert"><p className="field-error">{error}</p><button className="text-button" type="button"
       disabled={busy} onClick={() => { setError(null); setReload((value) => value + 1) }}>Reintentar</button></div>}
   </div>

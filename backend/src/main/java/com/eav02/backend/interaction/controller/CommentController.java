@@ -25,6 +25,10 @@ public class CommentController {
     @GetMapping("/posts/{id}/comments")
     public CommentPageResponse post(@PathVariable UUID id, @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) { return comments.listPost(id, page, size); }
+    @GetMapping("/posts/{id}/comments/count")
+    public CommentCountResponse postCount(@PathVariable UUID id) {
+        return new CommentCountResponse(comments.countPost(id));
+    }
     @GetMapping("/comments/{id}/replies")
     public CommentPageResponse replies(@PathVariable UUID id, @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) { return comments.listReplies(id, page, size); }

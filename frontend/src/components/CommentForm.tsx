@@ -3,7 +3,9 @@ import { sendComment, interactionError } from '../api/interaction'
 import { useAuth } from '../context/useAuth'
 import { Link } from 'react-router-dom'
 
-export default function CommentForm({ path, reply = false, onCreated }: { path: string; reply?: boolean; onCreated: () => void }) {
+export default function CommentForm({ path, reply = false, onCreated, onCancel }: {
+  path: string; reply?: boolean; onCreated: () => void; onCancel?: () => void
+}) {
   const { isAuthenticated } = useAuth()
   const [content, setContent] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -28,7 +30,11 @@ export default function CommentForm({ path, reply = false, onCreated }: { path: 
         aria-invalid={Boolean(error)} onChange={(event) => { setContent(event.target.value); setError(null) }} />
     </label>
     <div className="comment-form-actions"><span>{content.length} / 2.000</span>
-      <button className="button button-secondary" disabled={busy} type="submit">{busy ? 'Enviando...' : reply ? 'Responder' : 'Comentar'}</button></div>
+      <div className="comment-form-buttons">
+        {onCancel && <button className="comment-cancel" type="button" disabled={busy} onClick={onCancel}>Cancelar</button>}
+        <button className="button button-secondary" disabled={busy} type="submit">{busy ? 'Enviando...' : reply ? 'Responder' : 'Comentar'}</button>
+      </div>
+    </div>
     {error && <p className="field-error" role="alert">{error}</p>}
   </form>
 }

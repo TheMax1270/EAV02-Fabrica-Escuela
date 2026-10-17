@@ -10,6 +10,7 @@ export default function CommentThread({ path, replies = false, onCreated }: { pa
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [composerOpen, setComposerOpen] = useState(false)
   useEffect(() => {
     const controller = new AbortController()
     listComments(path, page, controller.signal).then((result) => {
@@ -22,17 +23,23 @@ export default function CommentThread({ path, replies = false, onCreated }: { pa
   function refresh(nextPage = page) { setLoading(true); setError(null); setPage(nextPage); setReload((value) => value + 1) }
   function created() {
     setSuccess(true)
+    setComposerOpen(false)
     refresh(data ? Math.floor(data.totalElements / 20) : 0)
     onCreated?.()
   }
   return <div className={replies ? 'reply-thread' : 'comment-thread'}>
-    <CommentForm path={path} reply={replies} onCreated={created} />
+    {!composerOpen && <button className="comment-box-trigger" type="button" onClick={() => setComposerOpen(true)}>
+      <span aria-hidden="true">◌</span> {replies ? 'Responder a este comentario' : 'Añadir comentario'}
+    </button>}
+    {composerOpen && <div className="comment-box">
+      <CommentForm path={path} reply={replies} onCreated={created} onCancel={() => setComposerOpen(false)} />
+    </div>}
     {success && <p className="post-success" role="status">{replies ? 'Respuesta enviada.' : 'Comentario enviado.'}</p>}
     {loading && <p className="loading-note" role="status">Cargando {replies ? 'respuestas' : 'comentarios'}...</p>}
     {error && <div className="form-error" role="alert"><p>{error}</p><button className="text-button" onClick={() => refresh()} type="button">Reintentar</button></div>}
     {!loading && !error && data && <>
       {data.content.length === 0 && <p className="interaction-empty">{replies ? 'Aún no hay respuestas.' : 'Aún no hay comentarios. Comparte tu primera impresión.'}</p>}
-      {data.content.map((comment) => <CommentItem key={comment.id} comment={comment} allowReplies={!replies} />)}
+      {data.content.map((comment) => <CommentItem key={comment.id} comment={comment} allowReplies />)}
       {data.totalPages > 1 && <nav className="pagination" aria-label={replies ? 'Páginas de respuestas' : 'Páginas de comentarios'}>
         <button type="button" className="button button-secondary" disabled={page === 0} onClick={() => refresh(page - 1)}>Anterior</button>
         <span>{data.page + 1} / {data.totalPages}</span>
