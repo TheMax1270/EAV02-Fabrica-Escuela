@@ -5,6 +5,8 @@ import { getProfileByUser, type ExperienceLevel, type Profile } from '../api/pro
 import { reportProfile } from '../api/report'
 import SiteHeader from '../components/SiteHeader'
 import ReportButton from '../components/ReportButton'
+import FollowButton from '../components/FollowButton'
+import FollowListPanel from '../components/FollowListPanel'
 import { profileReportStatus } from '../api/report'
 import { useAuth } from '../context/useAuth'
 
@@ -19,6 +21,7 @@ export default function DeveloperProfilePage() {
   const [notFound, setNotFound] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [followReload, setFollowReload] = useState(0)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -51,6 +54,7 @@ export default function DeveloperProfilePage() {
                   <p>{levelLabels[profile.experienceLevel]} · DevConnect</p>
                 </div>
               </div>
+              <FollowButton userId={profile.userId} onChange={() => setFollowReload((value) => value + 1)} />
               <section className="public-profile-section">
                 <h3>Sobre mí</h3>
                 <p>{profile.biography}</p>
@@ -67,6 +71,7 @@ export default function DeveloperProfilePage() {
                   {profile.technologies.map((technology) => <span key={technology}>{technology}</span>)}
                 </div>
               </section>
+              <FollowListPanel userId={profile.userId} reloadKey={followReload} />
               {user?.id !== profile.userId && <ReportButton statusCheck={() => profileReportStatus(profile.id)}
                 onSubmit={(payload) => reportProfile(profile.id, payload)} />}
             </div>
