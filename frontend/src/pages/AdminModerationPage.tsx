@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import {
-  dismissReport, listPendingReports, removeReportedContent, restoreReport, reviewReport,
+  dismissReport, listPendingReports, listResolvedReports, removeReportedContent, restoreReport, reviewReport,
   type AdminReport, type ModerationStatus, type ReportReason, type ReportTargetType,
 } from '../api/moderation'
 import type { ApiErrorResponse } from '../api/auth'
@@ -37,17 +37,20 @@ function errorMessage(error: unknown) {
 
 export default function AdminModerationPage() {
   const [page, setPage] = useState(0)
+  const [view, setView] = useState<'pending' | 'resolved'>('pending')
   const [data, setData] = useState<{ content: AdminReport[]; totalElements: number; totalPages: number } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
   const [pendingId, setPendingId] = useState<string | null>(null)
+  const [confirmation, setConfirmation] = useState<{ report: AdminReport; action: 'review' | 'restore' | 'remove' | 'dismiss' } | null>(null)
   const [reload, setReload] = useState(0)
 
   useEffect(() => {
     let cancelled = false
     setIsLoading(true)
-    listPendingReports(page, PAGE_SIZE).then((result) => {
+    const request = view === 'pending' ? listPendingReports(page, PAGE_SIZE) : listResolvedReports(page, PAGE_SIZE)
+    request.then((result) => {
       if (cancelled) return
       setData(result)
       setError(null)
@@ -57,17 +60,15 @@ export default function AdminModerationPage() {
       if (!cancelled) setIsLoading(false)
     })
     return () => { cancelled = true }
-  }, [page, reload])
+  }, [page, reload, view])
 
-  async function handleAction(report: AdminReport, action: 'review' | 'restore' | 'remove' | 'dismiss') {
+  function handleAction(report: AdminReport, action: 'review' | 'restore' | 'remove' | 'dismiss') {
+    setConfirmation({ report, action })
+  }
+
+  async function executeAction(report: AdminReport, action: 'review' | 'restore' | 'remove' | 'dismiss') {
     if (pendingId) return
-    const messages = {
-      review: '¿Marcar este contenido en revisión? Dejará de aparecer públicamente.',
-      restore: '¿Restaurar este contenido y resolver el reporte?',
-      remove: '¿Retirar este contenido? Se ocultará públicamente y el reporte se resolverá.',
-      dismiss: '¿Descartar este reporte sin modificar el contenido?',
-    }
-    if (!window.confirm(messages[action])) return
+    setConfirmation(null)
     setPendingId(report.id)
     setActionError(null)
     try {
@@ -99,13 +100,23 @@ export default function AdminModerationPage() {
           <p>Revisa reportes pendientes, aplica una decisión y conserva la trazabilidad.</p>
         </div>
 
+        <div className="moderation-tabs" role="tablist" aria-label="Vistas de reportes">
+          <button className={`moderation-tab ${view === 'pending' ? 'active' : ''}`} type="button"
+            role="tab" aria-selected={view === 'pending'} onClick={() => { setView('pending'); setPage(0); setReload((current) => current + 1) }}>
+            Pendientes
+          </button>
+          <button className={`moderation-tab ${view === 'resolved' ? 'active' : ''}`} type="button"
+            role="tab" aria-selected={view === 'resolved'} onClick={() => { setView('resolved'); setPage(0); setReload((current) => current + 1) }}>
+            Resueltos
+          </button>
+        </div>
         {actionError && <p className="form-error" role="alert">{actionError}</p>}
         {isLoading && <p className="loading-note" role="status">Cargando reportes...</p>}
         {error && <div className="form-error" role="alert"><span>{error}</span>
           <button className="text-button" type="button" onClick={() => setReload((current) => current + 1)}>Reintentar</button>
         </div>}
         {data && !error && <>
-          <p className="admin-count" role="status">{data.totalElements} reportes pendientes</p>
+          <p className="admin-count" role="status">{data.totalElements} reportes {view === 'pending' ? 'pendientes' : 'resueltos'}</p>
           <div className="moderation-list">
             {data.content.length === 0 && <p className="admin-empty">No hay reportes pendientes.</p>}
             {data.content.map((report) => (
@@ -126,7 +137,7 @@ export default function AdminModerationPage() {
                   <div><dt>Fecha</dt><dd>{formatDate(report.createdAt)}</dd></div>
                 </dl>
                 {report.details && <p className="moderation-details"><strong>Detalle:</strong> {report.details}</p>}
-                <div className="moderation-actions">
+                {view === 'pending' && <div className="moderation-actions">
                   {report.moderationStatus === 'VISIBLE' && <button className="button button-secondary" type="button"
                     disabled={pendingId !== null} onClick={() => void handleAction(report, 'review')}>
                     {pendingId === report.id ? 'Guardando...' : 'En revisión'}
@@ -137,11 +148,11 @@ export default function AdminModerationPage() {
                   </button>}
                   {report.moderationStatus && report.moderationStatus !== 'REMOVED' && <button className="button button-danger" type="button"
                     disabled={pendingId !== null} onClick={() => void handleAction(report, 'remove')}>
-                    Retirar
+                    Aceptar reporte
                   </button>}
                   <button className="button button-secondary" type="button" disabled={pendingId !== null}
                     onClick={() => void handleAction(report, 'dismiss')}>Descartar reporte</button>
-                </div>
+                </div>}
               </article>
             ))}
           </div>
@@ -154,6 +165,32 @@ export default function AdminModerationPage() {
           </nav>}
         </>}
       </main>
+      {confirmation && (
+        <div className="modal-overlay" role="presentation">
+          <div className="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="moderation-confirm-title">
+            <p className="eyebrow">ACCIÓN DE MODERACIÓN</p>
+            <h2 id="moderation-confirm-title">
+              {confirmation.action === 'review' ? 'Enviar a revisión' : confirmation.action === 'restore' ? 'Restaurar contenido' : confirmation.action === 'remove' ? 'Retirar contenido' : 'Descartar reporte'}
+            </h2>
+            <p>
+              {confirmation.action === 'review'
+                ? 'El contenido dejará de estar visible para la comunidad mientras se revisa.'
+                : confirmation.action === 'restore'
+                  ? 'El contenido volverá a estar disponible públicamente y el reporte se resolverá.'
+                  : confirmation.action === 'remove'
+                    ? 'El contenido se ocultará mediante eliminación lógica y el reporte se resolverá.'
+                    : 'El reporte se marcará como descartado y el contenido permanecerá sin cambios.'}
+            </p>
+            <div className="confirm-modal-actions">
+              <button className="button button-secondary" type="button" disabled={Boolean(pendingId)} onClick={() => setConfirmation(null)}>Cancelar</button>
+              <button className={`button ${confirmation.action === 'remove' ? 'button-danger' : 'button-primary'}`} type="button"
+                disabled={Boolean(pendingId)} onClick={() => void executeAction(confirmation.report, confirmation.action)}>
+                {pendingId ? 'Guardando...' : 'Confirmar acción'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

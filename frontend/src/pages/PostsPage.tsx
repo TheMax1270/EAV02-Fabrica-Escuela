@@ -8,7 +8,7 @@ import TextField from '../components/TextField'
 import InteractionPanel from '../components/InteractionPanel'
 import { useAuth } from '../context/useAuth'
 import ReportButton from '../components/ReportButton'
-import { reportPost } from '../api/report'
+import { postReportStatus, reportPost } from '../api/report'
 
 const PAGE_SIZE = 20
 type FieldErrors = { title?: string; content?: string; link?: string; categories?: string }
@@ -52,6 +52,7 @@ export default function PostsPage() {
   const [publishError, setPublishError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
+  const [composerOpen, setComposerOpen] = useState(false)
   const publishing = useRef(false)
   const resolving = useRef(false)
   const [resolvingId, setResolvingId] = useState<string | null>(null)
@@ -111,6 +112,7 @@ export default function PostsPage() {
       setCategories('')
       setFieldErrors({})
       setSuccess(true)
+      setComposerOpen(false)
       refreshList(0)
     } catch (error: unknown) {
       if (axios.isAxiosError<ApiErrorResponse>(error) && error.response?.status === 400) {
@@ -173,7 +175,10 @@ export default function PostsPage() {
         </div>
 
         {isAuthenticated ? (
-          <section className="post-composer" aria-labelledby="composer-title">
+          !composerOpen ? <button className="post-composer-trigger" type="button" onClick={() => setComposerOpen(true)}>
+            <span className="post-avatar" aria-hidden="true">{user?.username.charAt(0).toUpperCase()}</span>
+            <span>Crear publicación</span>
+          </button> : <section className="post-composer" aria-labelledby="composer-title">
             <div className="post-composer-heading">
               <span className="post-avatar" aria-hidden="true">{user?.username.charAt(0).toUpperCase()}</span>
               <div><h2 id="composer-title">Comparte con la comunidad</h2><p>Publicando como @{user?.username}</p></div>
@@ -214,9 +219,10 @@ export default function PostsPage() {
               {publishError && <p className="form-error" role="alert">{publishError}</p>}
               <div className="post-composer-actions">
                 <span className="post-character-count">{type === 'TECHNICAL_DISCUSSION' ? `Título: ${title.length} / 150` : 'Comparte una actualización con la comunidad'}</span>
-                <button className="button button-primary" type="submit" disabled={isPublishing}>
-                  {isPublishing ? 'Publicando...' : 'Publicar'}
-                </button>
+                <div className="post-composer-buttons">
+                  <button className="button button-secondary" type="button" disabled={isPublishing} onClick={() => setComposerOpen(false)}>Cancelar</button>
+                  <button className="button button-primary" type="submit" disabled={isPublishing}>{isPublishing ? 'Publicando...' : 'Publicar'}</button>
+                </div>
               </div>
             </form>
           </section>
@@ -266,7 +272,8 @@ export default function PostsPage() {
                     <button className="button button-danger post-resolve" type="button" disabled={deletingId !== null}
                       onClick={() => void handleDelete(post.id)}>{deletingId === post.id ? 'Eliminando...' : 'Eliminar'}</button>}
                   {deleteError?.id === post.id && <p className="form-error" role="alert">{deleteError.message}</p>}
-                  <ReportButton onSubmit={(payload) => reportPost(post.id, payload)} />
+                  {user?.id !== post.userId && <ReportButton statusCheck={() => postReportStatus(post.id)}
+                    onSubmit={(payload) => reportPost(post.id, payload)} />}
                   <InteractionPanel target={{ kind: 'posts', id: post.id }} />
                 </article>
               ))}

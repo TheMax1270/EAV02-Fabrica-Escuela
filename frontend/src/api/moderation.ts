@@ -33,6 +33,11 @@ export async function listPendingReports(page: number, size: number): Promise<Ad
   return response.data
 }
 
+export async function listResolvedReports(page: number, size: number): Promise<AdminReportPage> {
+  const response = await api.get<AdminReportPage>('/api/v1/admin/reports/resolved', { params: { page, size } })
+  return response.data
+}
+
 async function reportAction(reportId: string, action: 'review' | 'restore' | 'remove' | 'dismiss') {
   const response = await api.patch<AdminReport>(`/api/v1/admin/reports/${reportId}/${action}`)
   return response.data
