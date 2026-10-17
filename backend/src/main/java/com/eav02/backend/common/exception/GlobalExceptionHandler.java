@@ -139,6 +139,12 @@ public class GlobalExceptionHandler {
                 "No puedes suspender tu propia cuenta", Map.of()));
     }
 
+    @ExceptionHandler(SelfFollowException.class)
+    ResponseEntity<ApiError> selfFollow(SelfFollowException failure) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("SELF_FOLLOW_FORBIDDEN",
+                "No puedes seguir tu propia cuenta", Map.of()));
+    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     ResponseEntity<ApiError> constraintViolation(ConstraintViolationException failure) {
         Map<String, String> errors = new LinkedHashMap<>();

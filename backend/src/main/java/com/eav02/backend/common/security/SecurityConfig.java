@@ -86,6 +86,10 @@ public class SecurityConfig {
                                 "/api/v1/profiles/{id}/reports").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/posts/{id}/reports/me", "/api/v1/comments/{id}/reports/me",
                                 "/api/v1/profiles/{id}/reports/me").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/{userId}/follow-summary",
+                                "/api/v1/users/{userId}/followers", "/api/v1/users/{userId}/following").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/{userId}/followers/me").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/{userId}/followers/me").authenticated()
                         .anyRequest().denyAll())
                 .build();
     }
