@@ -13,6 +13,9 @@ public interface DeveloperProfileRepository extends JpaRepository<DeveloperProfi
 
     Optional<DeveloperProfile> findByUserId(UUID userId);
 
+    @Query("select p from DeveloperProfile p join fetch p.user where p.user.id = :userId and p.moderationStatus = com.eav02.backend.moderation.entity.ModerationStatus.VISIBLE")
+    Optional<DeveloperProfile> findPublicByUserId(@Param("userId") UUID userId);
+
     @Query("select p from DeveloperProfile p join fetch p.user where p.id = :id")
     Optional<DeveloperProfile> findWithUserById(@Param("id") UUID id);
 

@@ -19,6 +19,17 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
     @Modifying
     @Query("delete from Comment c where c.post.id = :postId and c.parent is null")
     int deletePostRoots(@Param("postId") UUID postId);
+
+    @Modifying
+    @Query("update Comment c set c.moderationStatus = com.eav02.backend.moderation.entity.ModerationStatus.REMOVED where c.post.id = :postId and c.moderationStatus <> com.eav02.backend.moderation.entity.ModerationStatus.REMOVED")
+    int removePostComments(@Param("postId") UUID postId);
+
+    @Modifying
+    @Query("update Comment c set c.moderationStatus = com.eav02.backend.moderation.entity.ModerationStatus.VISIBLE where c.post.id = :postId and c.moderationStatus = com.eav02.backend.moderation.entity.ModerationStatus.REMOVED")
+    int restorePostComments(@Param("postId") UUID postId);
+
+    @Query("select count(c) from Comment c where c.post.id = :postId and c.moderationStatus = com.eav02.backend.moderation.entity.ModerationStatus.VISIBLE")
+    long countVisiblePostComments(@Param("postId") UUID postId);
         @Query("select c from Comment c join fetch c.user left join fetch c.project left join fetch c.post left join fetch c.parent where c.id = :id")
     Optional<Comment> findWithTargetById(@Param("id") UUID id);
 

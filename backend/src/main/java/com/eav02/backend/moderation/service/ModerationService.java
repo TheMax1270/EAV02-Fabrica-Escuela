@@ -53,8 +53,20 @@ public class ModerationService {
 
     @Transactional(readOnly = true)
     public AdminReportPageResponse pending(int page, int size) {
+        return list(ReportStatus.PENDING, page, size);
+    }
+
+    @Transactional(readOnly = true)
+    public AdminReportPageResponse resolved(int page, int size) {
         var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt", "id"));
-        Page<AdminReportResponse> result = reports.findByStatusWithReporter(ReportStatus.PENDING, pageable)
+        Page<AdminReportResponse> result = reports.findByStatusesWithReporter(
+                java.util.List.of(ReportStatus.RESOLVED, ReportStatus.DISMISSED), pageable).map(this::response);
+        return AdminReportPageResponse.from(result);
+    }
+
+    private AdminReportPageResponse list(ReportStatus status, int page, int size) {
+        var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt", "id"));
+        Page<AdminReportResponse> result = reports.findByStatusWithReporter(status, pageable)
                 .map(this::response);
         return AdminReportPageResponse.from(result);
     }
@@ -95,12 +107,19 @@ public class ModerationService {
         } else if (action == Action.RESTORE) {
             if (target.status() != ModerationStatus.IN_REVIEW) throw new ModerationStateConflictException();
             target.restore();
+            if (report.getTargetType() == ReportTargetType.POST) {
+                comments.restorePostComments(report.getTargetId());
+            }
             report.resolve();
             audit.record(admin, AdminAction.CONTENT_RESTORED, report.getTargetType().name(), report.getTargetId(),
                     Map.of("reportId", reportId.toString()));
         } else if (action == Action.REMOVE) {
             if (target.status() == ModerationStatus.REMOVED) throw new ModerationStateConflictException();
             target.remove();
+            if (report.getTargetType() == ReportTargetType.POST) {
+                comments.removePostComments(report.getTargetId());
+                reports.resolvePendingCommentReportsForPost(report.getTargetId());
+            }
             report.resolve();
             audit.record(admin, AdminAction.CONTENT_REMOVED, report.getTargetType().name(), report.getTargetId(),
                     Map.of("reportId", reportId.toString()));

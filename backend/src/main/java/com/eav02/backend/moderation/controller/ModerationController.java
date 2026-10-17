@@ -36,6 +36,12 @@ public class ModerationController {
         return moderation.pending(page, size);
     }
 
+    @GetMapping("/resolved")
+    public AdminReportPageResponse resolved(@RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
+        return moderation.resolved(page, size);
+    }
+
     @PatchMapping("/{reportId}/review")
     public AdminReportResponse review(@PathVariable UUID reportId, @AuthenticationPrincipal Jwt jwt) {
         return moderation.review(reportId, adminId(jwt));

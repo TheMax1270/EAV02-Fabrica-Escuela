@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.eav02.backend.common.exception.CommentNotFoundException;
+import com.eav02.backend.common.exception.CannotReportOwnContentException;
 import com.eav02.backend.common.exception.PostNotFoundException;
 import com.eav02.backend.common.exception.ProfileNotFoundException;
 import com.eav02.backend.common.exception.ReportAlreadyExistsException;
@@ -14,6 +15,7 @@ import com.eav02.backend.common.exception.UserNotFoundException;
 import com.eav02.backend.interaction.repository.CommentRepository;
 import com.eav02.backend.moderation.dto.ReportRequest;
 import com.eav02.backend.moderation.dto.ReportResponse;
+import com.eav02.backend.moderation.dto.ReportStatusResponse;
 import com.eav02.backend.moderation.entity.Report;
 import com.eav02.backend.moderation.entity.ReportStatus;
 import com.eav02.backend.moderation.entity.ReportTargetType;
@@ -44,20 +46,29 @@ public class ReportService {
 
     @Transactional
     public ReportResponse reportPost(UUID postId, UUID reporterId, ReportRequest request) {
-        if (!posts.existsById(postId)) throw new PostNotFoundException();
+        var post = posts.findWithUserById(postId).orElseThrow(PostNotFoundException::new);
+        if (post.getUser().getId().equals(reporterId)) throw new CannotReportOwnContentException();
         return create(ReportTargetType.POST, postId, reporterId, request);
     }
 
     @Transactional
     public ReportResponse reportComment(UUID commentId, UUID reporterId, ReportRequest request) {
-        if (!comments.existsById(commentId)) throw new CommentNotFoundException();
+        var comment = comments.findWithTargetById(commentId).orElseThrow(CommentNotFoundException::new);
+        if (comment.getUser().getId().equals(reporterId)) throw new CannotReportOwnContentException();
         return create(ReportTargetType.COMMENT, commentId, reporterId, request);
     }
 
     @Transactional
     public ReportResponse reportProfile(UUID profileId, UUID reporterId, ReportRequest request) {
-        if (!profiles.existsById(profileId)) throw new ProfileNotFoundException();
+        var profile = profiles.findWithUserById(profileId).orElseThrow(ProfileNotFoundException::new);
+        if (profile.getUser().getId().equals(reporterId)) throw new CannotReportOwnContentException();
         return create(ReportTargetType.PROFILE, profileId, reporterId, request);
+    }
+
+    @Transactional(readOnly = true)
+    public ReportStatusResponse status(ReportTargetType targetType, UUID targetId, UUID reporterId) {
+        return new ReportStatusResponse(reports.existsByReporter_IdAndTargetTypeAndTargetIdAndStatus(
+                reporterId, targetType, targetId, ReportStatus.PENDING));
     }
 
     private ReportResponse create(ReportTargetType targetType, UUID targetId, UUID reporterId,

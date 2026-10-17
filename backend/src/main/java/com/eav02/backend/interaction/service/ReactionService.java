@@ -43,6 +43,7 @@ public class ReactionService {
         long count = project ? reactions.countByProject_Id(id) : reactions.countByPost_Id(id);
         Boolean liked = userId == null ? null : project ? reactions.existsByProject_IdAndUser_Id(id, userId)
                 : reactions.existsByPost_IdAndUser_Id(id, userId);
-        return new ReactionSummaryResponse(count, liked);
+        var usernames = project ? reactions.findProjectUsernames(id) : reactions.findPostUsernames(id);
+        return new ReactionSummaryResponse(count, liked, usernames);
     }
 }
