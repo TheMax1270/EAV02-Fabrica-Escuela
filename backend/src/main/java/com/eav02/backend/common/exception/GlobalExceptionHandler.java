@@ -191,4 +191,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("REPORT_ALREADY_EXISTS",
             "Ya tienes un reporte pendiente sobre este elemento", Map.of()));
     }
+
+    @ExceptionHandler(CannotReportOwnContentException.class)
+    ResponseEntity<ApiError> cannotReportOwnContent(CannotReportOwnContentException failure) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("OWN_CONTENT_REPORT",
+                "No puedes reportar tu propio contenido", Map.of()));
+    }
 }
