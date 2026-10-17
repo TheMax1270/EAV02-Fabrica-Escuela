@@ -16,6 +16,10 @@ const levelLabels: Record<ExperienceLevel, string> = {
 
 export default function DeveloperProfilePage() {
   const { userId } = useParams()
+  return userId ? <DeveloperProfileView key={userId} userId={userId} /> : null
+}
+
+function DeveloperProfileView({ userId }: Readonly<{ userId: string }>) {
   const { user } = useAuth()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [notFound, setNotFound] = useState(false)
@@ -25,7 +29,7 @@ export default function DeveloperProfilePage() {
 
   useEffect(() => {
     const controller = new AbortController()
-    if (!userId) return
+    window.scrollTo(0, 0)
     getProfileByUser(userId, controller.signal).then((result) => {
       if (!controller.signal.aborted) { setProfile(result); setError(null); setNotFound(false) }
     }).catch((failure: unknown) => {
@@ -43,7 +47,13 @@ export default function DeveloperProfilePage() {
         <section className="auth-panel profile-form-panel" aria-labelledby="dev-profile-title">
           <p className="eyebrow">PERFIL DE LA COMUNIDAD</p>
           {loading && <p className="loading-note" role="status">Cargando perfil...</p>}
-          {notFound && <p>Este desarrollador aún no ha creado su perfil técnico.</p>}
+          {notFound && (
+            <div className="public-profile">
+              <p>Este desarrollador aún no ha creado su perfil técnico.</p>
+              <FollowButton userId={userId} onChange={() => setFollowReload((value) => value + 1)} />
+              <FollowListPanel userId={userId} reloadKey={followReload} />
+            </div>
+          )}
           {error && <p className="form-error" role="alert">{error}</p>}
           {profile && (
             <div className="public-profile">
