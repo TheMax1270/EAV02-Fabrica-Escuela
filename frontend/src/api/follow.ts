@@ -18,3 +18,7 @@ export async function setFollowing(userId: string, follow: boolean) {
 export async function listFollows(userId: string, kind: FollowListKind, page: number, signal?: AbortSignal) {
   return (await api.get<FollowPage>(`${userPath(userId)}/${kind}`, { params: { page, size: 20 }, signal })).data
 }
+export async function getFollowedAmong(userIds: string[], signal?: AbortSignal) {
+  const params = { userIds: userIds.join(',') }
+  return (await api.get<{ userIds: string[] }>('/api/v1/me/following', { params, signal })).data.userIds
+}
