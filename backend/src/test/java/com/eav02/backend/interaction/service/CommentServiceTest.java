@@ -86,7 +86,7 @@ class CommentServiceTest {
         var result = service.reply(parent.getId(), author.getId(), new CommentRequest("Respuesta"));
         assertEquals(post.getId(), result.postId()); assertNull(result.projectId());
     }
-    @Test void rejectsReplyToReplyBeforeWriting() {
+        @Test void rejectsReplyToReplyBeforeWriting() {
         var child = new Comment(author, project, null, root(), "Respuesta", NOW);
         ReflectionTestUtils.setField(child, "id", UUID.randomUUID());
         when(comments.findWithTargetById(child.getId())).thenReturn(Optional.of(child));

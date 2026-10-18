@@ -594,3 +594,14 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--cyan); outline-
   .site-nav { column-gap: 13px; }
   .nav-username { max-width: 75px; }
 }
+
+.follow-controls { margin: 18px 0 8px; color: var(--muted); font-size: .88rem; }
+.follow-row { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+.follow-row strong { color: var(--text); }
+.follow-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; padding: 0; list-style: none; }
+.follow-list a { color: var(--accent); text-decoration: none; }
+.admin-user-link { color: var(--accent); font-weight: 700; text-decoration: none; }
+.admin-user-link:hover { text-decoration: underline; }
+.admin-actions .button + .button { margin-left: 8px; }
+.post-author-name { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.post-following { padding: 2px 8px; border: 1px solid var(--accent); border-radius: var(--radius-sm); color: var(--accent); background: #282542; font-size: .7rem; font-weight: 650; }

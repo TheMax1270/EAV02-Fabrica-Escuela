@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
 import { createPost, listPosts, resolvePost, deletePost, type Post, type PostPage, type PostPayload } from '../api/post'
@@ -7,6 +7,7 @@ import SiteHeader from '../components/SiteHeader'
 import TextField from '../components/TextField'
 import InteractionPanel from '../components/InteractionPanel'
 import { useAuth } from '../context/useAuth'
+import { useFollowedUsers } from '../hooks/useFollowedUsers'
 import ReportButton from '../components/ReportButton'
 import { postReportStatus, reportPost } from '../api/report'
 
@@ -43,6 +44,8 @@ export default function PostsPage() {
   const [reload, setReload] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
+  const authorIds = useMemo(() => data?.content.map((post) => post.userId) ?? [], [data])
+  const followed = useFollowedUsers(authorIds)
   const [title, setTitle] = useState('')
   const [type, setType] = useState<Post['type']>('GENERAL')
   const [link, setLink] = useState('')
@@ -251,7 +254,10 @@ export default function PostsPage() {
                 <article className="post-card" key={post.id}>
                   <header className="post-author">
                     <span className="post-avatar" aria-hidden="true">{post.username.charAt(0).toUpperCase()}</span>
-                    <div><Link className="post-username" to={`/developers/${post.userId}`}>@{post.username}</Link>
+                    <div><div className="post-author-name">
+                      <Link className="post-username" to={`/developers/${post.userId}`}>@{post.username}</Link>
+                      {followed.has(post.userId) && <span className="post-following">Siguiendo</span>}
+                    </div>
                       <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time></div>
                   </header>
                   <div className="post-badges"><span className={`post-type post-type-${post.type === 'GENERAL' ? 'general' : 'technical'}`}>

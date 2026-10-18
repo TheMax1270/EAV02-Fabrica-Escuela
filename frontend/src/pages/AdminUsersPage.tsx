@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import axios from 'axios'
+import { Link } from 'react-router-dom'
 import { listUsers, reactivateUser, suspendUser, type AccountStatus, type AdminUser, type UserPage } from '../api/admin'
 import type { ApiErrorResponse, AuthUser } from '../api/auth'
 import SiteHeader from '../components/SiteHeader'
@@ -197,7 +198,10 @@ export default function AdminUsersPage() {
                     return (
                       <tr key={row.id}>
                         <td>{row.fullName}</td>
-                        <td>{row.username}{isSelf && <span className="admin-self"> (tú)</span>}</td>
+                        <td>
+                          <Link className="admin-user-link" to={`/developers/${row.id}`}>{row.username}</Link>
+                          {isSelf && <span className="admin-self"> (tú)</span>}
+                        </td>
                         <td>{row.email}</td>
                         <td>{roleLabels[row.role]}</td>
                         <td>
@@ -207,6 +211,7 @@ export default function AdminUsersPage() {
                         </td>
                         <td>{formatDate(row.createdAt)}</td>
                         <td className="admin-actions">
+                          <Link className="button button-secondary" to={`/developers/${row.id}`}>Ver perfil</Link>
                           <button className={`button ${suspending ? 'button-danger' : 'button-secondary'}`} type="button"
                             onClick={() => requestStatusChange(row)}
                             disabled={Boolean(pendingId) || (isSelf && suspending)}
