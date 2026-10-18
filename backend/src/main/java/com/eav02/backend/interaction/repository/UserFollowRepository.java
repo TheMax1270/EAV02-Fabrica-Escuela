@@ -1,6 +1,8 @@
 package com.eav02.backend.interaction.repository;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -28,6 +30,9 @@ public interface UserFollowRepository extends JpaRepository<UserFollow, UUID> {
     long countByFollowed_Id(UUID followedId);
 
     long countByFollower_Id(UUID followerId);
+
+    @Query("select f.followed.id from UserFollow f where f.follower.id = :followerId and f.followed.id in :userIds")
+    List<UUID> findFollowedIds(@Param("followerId") UUID followerId, @Param("userIds") Collection<UUID> userIds);
 
     @Query(value = "select new com.eav02.backend.interaction.dto.FollowUserResponse(u.id, u.username, f.createdAt) "
             + "from UserFollow f join f.follower u where f.followed.id = :userId and u.enabled = true",

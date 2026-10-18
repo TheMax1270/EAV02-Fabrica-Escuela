@@ -1,6 +1,8 @@
 package com.eav02.backend.interaction.service;
 
 import java.time.Clock;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.PageRequest;
@@ -13,6 +15,7 @@ import com.eav02.backend.common.exception.SelfFollowException;
 import com.eav02.backend.common.exception.UserNotFoundException;
 import com.eav02.backend.interaction.dto.FollowPageResponse;
 import com.eav02.backend.interaction.dto.FollowSummaryResponse;
+import com.eav02.backend.interaction.dto.FollowedIdsResponse;
 import com.eav02.backend.interaction.repository.UserFollowRepository;
 import com.eav02.backend.user.entity.AppUser;
 import com.eav02.backend.user.repository.UserRepository;
@@ -63,6 +66,14 @@ public class FollowService {
     public FollowPageResponse following(UUID userId, int page, int size) {
         requireExistingUser(userId);
         return FollowPageResponse.from(follows.findFollowing(userId, pageable(page, size)));
+    }
+
+    @Transactional(readOnly = true)
+    public FollowedIdsResponse followedAmong(UUID followerId, Collection<UUID> userIds) {
+        if (userIds.isEmpty()) {
+            return new FollowedIdsResponse(List.of());
+        }
+        return new FollowedIdsResponse(follows.findFollowedIds(followerId, userIds));
     }
 
     private void requireExistingUser(UUID userId) {

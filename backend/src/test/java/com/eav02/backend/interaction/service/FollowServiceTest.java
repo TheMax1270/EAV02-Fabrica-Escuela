@@ -162,6 +162,20 @@ class FollowServiceTest {
         verifyNoInteractions(follows);
     }
 
+    @Test
+    void returnsFollowedIdsAmongCandidates() {
+        var candidates = List.of(followed, UUID.randomUUID());
+        when(follows.findFollowedIds(follower, candidates)).thenReturn(List.of(followed));
+
+        assertEquals(List.of(followed), service.followedAmong(follower, candidates).userIds());
+    }
+
+    @Test
+    void emptyCandidatesSkipQuery() {
+        assertEquals(List.of(), service.followedAmong(follower, List.of()).userIds());
+        verifyNoInteractions(follows);
+    }
+
     private AppUser user(boolean enabled) {
         return new AppUser("Grace Hopper", "grace", "grace@example.com", "hash", UserRole.DEVELOPER, enabled, now);
     }

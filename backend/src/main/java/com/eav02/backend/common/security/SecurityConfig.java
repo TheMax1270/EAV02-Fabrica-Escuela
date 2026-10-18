@@ -90,6 +90,7 @@ public class SecurityConfig {
                                 "/api/v1/users/{userId}/followers", "/api/v1/users/{userId}/following").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/{userId}/followers/me").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/{userId}/followers/me").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/me/following").authenticated()
                         .anyRequest().denyAll())
                 .build();
     }
