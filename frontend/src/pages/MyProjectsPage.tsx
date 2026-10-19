@@ -10,6 +10,12 @@ const statusLabels: Record<ProjectStatus, string> = {
   LOOKING_FOR_COLLABORATORS: 'Buscando colaboradores',
 }
 
+const statusClasses: Record<ProjectStatus, string> = {
+  IN_PROGRESS: 'project-status-in-progress',
+  COMPLETED: 'project-status-completed',
+  LOOKING_FOR_COLLABORATORS: 'project-status-collaborators',
+}
+
 const emptyValues: ProjectPayload = {
   title: '', description: '', technologies: [], status: 'IN_PROGRESS', repositoryUrl: null,
 }
@@ -143,24 +149,49 @@ export default function MyProjectsPage() {
         )}
 
         {!isLoading && !error && !editingId && (
-          <div className="highlight-grid">
+          <div className="projects-grid">
             {projects.map((project) => (
-              <div className="highlight" key={project.id}>
-                <h3>{project.title}</h3>
-                <p>{project.description}</p>
-                <div className="skill-list">
-                  {project.technologies.map((tech) => <span key={tech}>{tech}</span>)}
+              <article className="project-card" key={project.id}>
+                <div className="project-card-header">
+                  <h2>{project.title}</h2>
+                  <span className={`project-status ${statusClasses[project.status]}`}>
+                    {statusLabels[project.status]}
+                  </span>
                 </div>
-                <p><strong>{statusLabels[project.status]}</strong></p>
-                {project.repositoryUrl && (
-                  <a href={project.repositoryUrl} target="_blank" rel="noreferrer">Repositorio ↗</a>
-                )}
-                <button className="button button-secondary" type="button" onClick={() => startEdit(project)}>
-                  Editar
-                </button>
-              </div>
+                <div className="project-field">
+                  <h3>Descripción</h3>
+                  <p>{project.description}</p>
+                </div>
+                <div className="project-field">
+                  <h3>Tecnologías utilizadas</h3>
+                  <div className="skill-list">
+                    {project.technologies.map((tech) => <span key={tech}>{tech}</span>)}
+                  </div>
+                </div>
+                <div className="project-meta">
+                  <div className="project-field">
+                    <h3>Estado</h3>
+                    <p>{statusLabels[project.status]}</p>
+                  </div>
+                  <div className="project-field">
+                    <h3>Repositorio</h3>
+                    {project.repositoryUrl ? (
+                      <a className="project-repository-link" href={project.repositoryUrl} target="_blank" rel="noreferrer">
+                        GitHub/GitLab ↗
+                      </a>
+                    ) : (
+                      <p>No registrado</p>
+                    )}
+                  </div>
+                </div>
+                <div className="project-card-actions">
+                  <button className="button button-secondary" type="button" onClick={() => startEdit(project)}>
+                    Editar proyecto
+                  </button>
+                </div>
+              </article>
             ))}
-            {projects.length === 0 && <p>Aún no has publicado proyectos.</p>}
+            {projects.length === 0 && <p className="projects-empty">Aún no has publicado proyectos.</p>}
           </div>
         )}
 

@@ -38,20 +38,10 @@ Completar el archivo `.env`:
 DB_URL=
 DB_USERNAME=
 DB_PASSWORD=
-JWT_SECRET=
+
 ```
 
 Las credenciales de PostgreSQL corresponden a la base de datos configurada en Supabase.
-
-`JWT_SECRET` debe ser una clave Base64 de al menos 32 bytes. Puede generarse en PowerShell con:
-
-```powershell
-$rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
-$bytes = New-Object byte[] 32
-$rng.GetBytes($bytes)
-$rng.Dispose()
-[Convert]::ToBase64String($bytes)
-```
 
 El archivo `.env` no debe subirse al repositorio.
 

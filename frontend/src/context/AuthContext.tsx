@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import axios, { type InternalAxiosRequestConfig } from 'axios'
 import { useNavigate } from 'react-router-dom'
-import { api } from '../api/client'
+import { api, setApiAccessToken } from '../api/client'
 import { loginUser, logoutUser, refreshSession, type AuthUser, type LoginPayload } from '../api/auth'
 import { AuthContext, type Session } from './auth-state'
 
@@ -23,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const replaceSession = useCallback((next: Session | null) => {
     sessionRef.current = next
+    setApiAccessToken(next?.accessToken ?? null)
     setSession(next)
   }, [])
 
@@ -53,14 +54,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let refreshPromise: Promise<string> | null = null
-    const requestId = api.interceptors.request.use((config) => {
-      if (config.url?.startsWith('/api/') && !isPublicAuthRequest(config.url)
-          && sessionRef.current?.accessToken) {
-        config.headers.set('Authorization', `Bearer ${sessionRef.current.accessToken}`)
-      }
-      return config
-    })
-
     const responseId = api.interceptors.response.use(undefined, async (error: unknown) => {
       if (!axios.isAxiosError(error) || error.response?.status !== 401 || !error.config) {
         return Promise.reject(error)
@@ -104,7 +97,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
 
     return () => {
-      api.interceptors.request.eject(requestId)
       api.interceptors.response.eject(responseId)
     }
   }, [navigate, replaceSession])
