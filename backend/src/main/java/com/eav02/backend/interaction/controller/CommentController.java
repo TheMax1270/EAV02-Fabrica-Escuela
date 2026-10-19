@@ -44,4 +44,10 @@ public class CommentController {
     public ResponseEntity<CommentResponse> reply(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt, @Valid @RequestBody CommentRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(comments.reply(id, UUID.fromString(jwt.getSubject()), request));
     }
+
+    @DeleteMapping("/comments/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
+        comments.removeOwn(id, UUID.fromString(jwt.getSubject()));
+        return ResponseEntity.noContent().build();
+    }
 }
