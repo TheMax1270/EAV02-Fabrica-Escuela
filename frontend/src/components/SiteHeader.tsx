@@ -13,11 +13,13 @@ export default function SiteHeader() {
         </Link>
         <nav className="site-nav" aria-label="Navegación principal">
           <NavLink to="/" end>Inicio</NavLink>
+          <NavLink to="/posts">Publicaciones</NavLink>
           {isAuthenticated ? (
             <>
               <NavLink to="/account">Mi cuenta</NavLink>
               <NavLink to="/profile">Perfil técnico</NavLink>
               {user?.role === 'ADMIN' && <NavLink to="/admin/users">Usuarios</NavLink>}
+              {user?.role === 'ADMIN' && <NavLink to="/admin/reports">Reportes</NavLink>}
               <span className="nav-username" title={user?.username}>{user?.username}</span>
               <button className="nav-logout" type="button" onClick={() => void logout()}
                 disabled={isLoggingOut}>

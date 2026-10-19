@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { createProject, getMyProjects, updateProject, type Project, type ProjectPayload, type ProjectStatus } from '../api/project'
 import SiteHeader from '../components/SiteHeader'
 import TextField from '../components/TextField'
+import InteractionPanel from '../components/InteractionPanel'
 import { Link } from 'react-router-dom'
 
 const statusLabels: Record<ProjectStatus, string> = {
@@ -185,10 +186,12 @@ export default function MyProjectsPage() {
                   </div>
                 </div>
                 <div className="project-card-actions">
+                  <Link className="button button-secondary" to={`/projects/${project.id}`}>Ver proyecto público</Link>
                   <button className="button button-secondary" type="button" onClick={() => startEdit(project)}>
                     Editar proyecto
                   </button>
                 </div>
+                <InteractionPanel target={{ kind: 'projects', id: project.id }} />
               </article>
             ))}
             {projects.length === 0 && <p className="projects-empty">Aún no has publicado proyectos.</p>}

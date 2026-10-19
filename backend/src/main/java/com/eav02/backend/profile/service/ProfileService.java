@@ -48,7 +48,7 @@ public class ProfileService implements IProfileService {
 
     @Transactional(readOnly = true)
     public ProfileResponse getPublic(UUID profileId) {
-        return profiles.findWithUserById(profileId).map(ProfileResponse::from)
+        return profiles.findPublicWithUserById(profileId).map(ProfileResponse::from)
                 .orElseThrow(ProfileNotFoundException::new);
     }
 
@@ -67,6 +67,12 @@ public class ProfileService implements IProfileService {
         }
         update(profile, request);
         return ProfileResponse.from(profile);
+    }
+
+    @Transactional(readOnly = true)
+    public ProfileResponse getByUserId(UUID userId) {
+        return profiles.findPublicByUserId(userId).map(ProfileResponse::from)
+            .orElseThrow(ProfileNotFoundException::new);
     }
 
     private void update(DeveloperProfile profile, ProfileRequest request) {

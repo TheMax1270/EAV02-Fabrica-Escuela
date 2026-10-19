@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.eav02.backend.user.entity.AppUser;
+import com.eav02.backend.moderation.entity.ModerationStatus;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -64,6 +65,10 @@ public class DeveloperProfile {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "moderation_status", nullable = false, length = 20)
+    private ModerationStatus moderationStatus = ModerationStatus.VISIBLE;
+
     protected DeveloperProfile() {
     }
 
@@ -106,4 +111,8 @@ public class DeveloperProfile {
     public String getPortfolioUrl() { return portfolioUrl; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
+    public ModerationStatus getModerationStatus() { return moderationStatus; }
+    public void markInReview() { moderationStatus = ModerationStatus.IN_REVIEW; }
+    public void restore() { moderationStatus = ModerationStatus.VISIBLE; }
+    public void remove() { moderationStatus = ModerationStatus.REMOVED; }
 }

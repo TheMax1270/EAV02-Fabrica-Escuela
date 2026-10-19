@@ -16,6 +16,18 @@ import jakarta.validation.ConstraintViolationException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    @ExceptionHandler(CommentNotFoundException.class)
+    ResponseEntity<ApiError> commentNotFound(CommentNotFoundException failure) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError("COMMENT_NOT_FOUND",
+                "Comentario no encontrado", Map.of()));
+    }
+
+    @ExceptionHandler(ReplyDepthException.class)
+    ResponseEntity<ApiError> replyDepth(ReplyDepthException failure) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("REPLY_DEPTH_EXCEEDED",
+                "Solo puedes responder a un comentario raiz", Map.of()));
+    }
+
     @ExceptionHandler(InvalidCredentialsException.class)
     ResponseEntity<ApiError> invalidCredentials(InvalidCredentialsException failure) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiError("INVALID_CREDENTIALS",
@@ -73,6 +85,24 @@ public class GlobalExceptionHandler {
                         .body(new ApiError("INTERNAL_ERROR", "No se pudo completar la operacion", Map.of())));
     }
 
+    @ExceptionHandler(ReportNotFoundException.class)
+    ResponseEntity<ApiError> reportNotFound(ReportNotFoundException failure) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError("REPORT_NOT_FOUND",
+                "Reporte no encontrado", Map.of()));
+    }
+
+    @ExceptionHandler(ModerationTargetNotFoundException.class)
+    ResponseEntity<ApiError> moderationTargetNotFound(ModerationTargetNotFoundException failure) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError("TARGET_NOT_FOUND",
+                "El elemento reportado no existe", Map.of()));
+    }
+
+    @ExceptionHandler(ModerationStateConflictException.class)
+    ResponseEntity<ApiError> moderationStateConflict(ModerationStateConflictException failure) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("MODERATION_STATE_CONFLICT",
+                "El reporte ya fue procesado", Map.of()));
+    }
+
     @ExceptionHandler(ProfileAlreadyExistsException.class)
     ResponseEntity<ApiError> profileAlreadyExists(ProfileAlreadyExistsException failure) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("PROFILE_ALREADY_EXISTS",
@@ -109,6 +139,12 @@ public class GlobalExceptionHandler {
                 "No puedes suspender tu propia cuenta", Map.of()));
     }
 
+    @ExceptionHandler(SelfFollowException.class)
+    ResponseEntity<ApiError> selfFollow(SelfFollowException failure) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("SELF_FOLLOW_FORBIDDEN",
+                "No puedes seguir tu propia cuenta", Map.of()));
+    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     ResponseEntity<ApiError> constraintViolation(ConstraintViolationException failure) {
         Map<String, String> errors = new LinkedHashMap<>();
@@ -130,10 +166,47 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError("PROJECT_NOT_FOUND",
             "Proyecto no encontrado", Map.of()));
     }
+
+    @ExceptionHandler(PostNotFoundException.class)
+    ResponseEntity<ApiError> postNotFound(PostNotFoundException failure) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError("POST_NOT_FOUND",
+                "Publicacion no encontrada", Map.of()));
+    }
+
+    @ExceptionHandler(PostOwnershipException.class)
+    ResponseEntity<ApiError> postOwnership(PostOwnershipException failure) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError("POST_FORBIDDEN",
+                "Solo el autor puede realizar esta accion sobre su publicacion", Map.of()));
+    }
+
+    @ExceptionHandler(PostTypeConflictException.class)
+    ResponseEntity<ApiError> postTypeConflict(PostTypeConflictException failure) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("POST_TYPE_CONFLICT",
+                "Solo se pueden resolver discusiones tecnicas", Map.of()));
+    }
+
     
     @ExceptionHandler(ProjectOwnershipException.class)
     ResponseEntity<ApiError> projectOwnership(ProjectOwnershipException failure) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError("PROJECT_FORBIDDEN",
             "No puedes editar el proyecto de otro usuario", Map.of()));
+    }
+
+    @ExceptionHandler(ReportAlreadyExistsException.class)
+    ResponseEntity<ApiError> reportAlreadyExists(ReportAlreadyExistsException failure) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("REPORT_ALREADY_EXISTS",
+            "Ya tienes un reporte pendiente sobre este elemento", Map.of()));
+    }
+
+    @ExceptionHandler(CannotReportOwnContentException.class)
+    ResponseEntity<ApiError> cannotReportOwnContent(CannotReportOwnContentException failure) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("OWN_CONTENT_REPORT",
+                "No puedes reportar tu propio contenido", Map.of()));
+    }
+
+    @ExceptionHandler(CommentOwnershipException.class)
+    ResponseEntity<ApiError> commentOwnership(CommentOwnershipException failure) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError("COMMENT_FORBIDDEN",
+                "Solo puedes eliminar tus propios comentarios", Map.of()));
     }
 }

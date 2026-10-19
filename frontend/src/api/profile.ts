@@ -33,3 +33,8 @@ export async function updateOwnProfile(payload: ProfilePayload): Promise<Profile
   const response = await api.put<Profile>('/api/v1/profile/me', payload)
   return response.data
 }
+
+export async function getProfileByUser(userId: string, signal?: AbortSignal): Promise<Profile> {
+  const response = await api.get<Profile>(`/api/v1/profiles/user/${userId}`, { signal })
+  return response.data
+}

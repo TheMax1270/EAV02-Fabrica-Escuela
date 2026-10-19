@@ -58,6 +58,11 @@ public class ProfileController {
         return profiles.update(profileId, userId(jwt), request);
     }
 
+    @GetMapping("/profiles/user/{userId}")
+    public ProfileResponse publicProfileByUser(@PathVariable UUID userId) {
+        return profiles.getByUserId(userId);
+    }
+
     private UUID userId(Jwt jwt) {
         return UUID.fromString(jwt.getSubject());
     }

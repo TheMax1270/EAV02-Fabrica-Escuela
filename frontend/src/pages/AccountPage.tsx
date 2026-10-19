@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getCurrentUser, type AuthUser } from '../api/auth'
 import SiteHeader from '../components/SiteHeader'
+import FollowButton from '../components/FollowButton'
+import FollowListPanel from '../components/FollowListPanel'
 import { useAuth } from '../context/useAuth'
 import { Link } from 'react-router-dom'
 
@@ -69,6 +71,11 @@ export default function AccountPage() {
               <span>Rol en la comunidad</span>
               <strong>{roleLabels[current.role]}</strong>
             </div>
+            <section className="public-profile-section" aria-label="Comunidad">
+              <h3>Comunidad</h3>
+              <FollowButton userId={current.id} />
+              <FollowListPanel userId={current.id} reloadKey={0} />
+            </section>
             <Link className="button button-secondary" to="/projects">Ver mis proyectos</Link>
             <Link className="button button-secondary" to="/profile">Crear o editar perfil técnico</Link>
             <button className="button button-secondary" type="button" onClick={() => void logout()}

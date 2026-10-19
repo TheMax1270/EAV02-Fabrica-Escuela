@@ -7,6 +7,9 @@ export type AuthContextValue = {
   user: AuthUser | null
   isAuthenticated: boolean
   isLoggingOut: boolean
+  isRestoringSession: boolean
+  sessionRestoreError: string | null
+  retrySessionRestore: () => Promise<void>
   login: (payload: LoginPayload) => Promise<void>
   logout: () => Promise<void>
   updateUser: (user: AuthUser) => void
