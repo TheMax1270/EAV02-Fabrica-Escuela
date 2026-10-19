@@ -68,9 +68,7 @@ public class CommentService {
         return response(comments.findReplies(id, pageable(page, size)), false);
     }
     private Comment root(UUID id) {
-        var parent = comments.findWithTargetById(id).orElseThrow(CommentNotFoundException::new);
-        if (parent.getParent() != null) throw new ReplyDepthException();
-        return parent;
+        return comments.findWithTargetById(id).orElseThrow(CommentNotFoundException::new);
     }
     private PageRequest pageable(int page, int size) {
         return PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt", "id"));
