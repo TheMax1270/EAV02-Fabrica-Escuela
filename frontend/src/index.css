@@ -501,6 +501,8 @@ a { color: inherit; }
 .comment-cancel { margin-top: 8px; border: 0; background: none; color: var(--muted); font-size: .8rem; cursor: pointer; }
 .comment-form-buttons { display: flex; align-items: center; gap: 10px; }
 .comment-form-buttons .comment-cancel { margin-top: 0; }
+.comment-delete { margin-top: 10px; border: 0; background: none; color: var(--danger); font-size: .78rem; cursor: pointer; }
+.comment-delete:disabled { opacity: .6; cursor: wait; }
 .moderation-tabs { display: flex; gap: 8px; margin-top: 28px; border-bottom: 1px solid var(--border); }
 .moderation-tab { padding: 11px 15px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--muted); font: inherit; cursor: pointer; }
 .moderation-tab.active { border-bottom-color: var(--accent); color: var(--text); }

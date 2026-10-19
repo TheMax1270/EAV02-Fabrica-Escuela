@@ -23,8 +23,16 @@ export async function listComments(path: string, page: number, signal?: AbortSig
 export async function getCommentCount(target: Target) {
   return (await api.get<{ count: number }>(`${targetPath(target)}/comments/count`)).data.count
 }
+export async function getReplyCount(commentId: string) {
+  return (await api.get<CommentPage>(`/api/v1/comments/${commentId}/replies`, {
+    params: { page: 0, size: 1 },
+  })).data.totalElements
+}
 export async function sendComment(path: string, content: string) {
   return (await api.post<Comment>(path, { content })).data
+}
+export async function deleteComment(commentId: string) {
+  await api.delete(`/api/v1/comments/${commentId}`)
 }
 export async function getLikes(target: Target, signal?: AbortSignal) {
   return (await api.get<LikeSummary>(`${targetPath(target)}/likes`, { signal })).data
