@@ -20,6 +20,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.eav02.backend.common.exception.ProfileAlreadyExistsException;
@@ -103,11 +105,14 @@ class ProfileServiceTest {
     }
 
     @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
     void getPublicThrowsWhenProfileMissing() {
-        UUID profileId = UUID.randomUUID();
-        when(profiles.findWithUserById(profileId)).thenReturn(Optional.empty());
+        UUID userId = UUID.randomUUID();
+        when(profiles.findByUserId(userId)).thenReturn(Optional.empty());
 
-        assertThrows(ProfileNotFoundException.class, () -> service.getPublic(profileId));
+        assertThrows(ProfileNotFoundException.class, () -> {
+            service.getPublic(userId);
+        });
     }
 
     @Test

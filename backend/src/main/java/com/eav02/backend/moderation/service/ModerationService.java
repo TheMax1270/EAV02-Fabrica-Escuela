@@ -27,6 +27,7 @@ import com.eav02.backend.post.entity.Post;
 import com.eav02.backend.post.repository.PostRepository;
 import com.eav02.backend.profile.entity.DeveloperProfile;
 import com.eav02.backend.profile.repository.DeveloperProfileRepository;
+import com.eav02.backend.user.entity.AppUser;
 import com.eav02.backend.user.repository.UserRepository;
 
 @Service
@@ -99,37 +100,51 @@ public class ModerationService {
         var admin = users.findById(adminId).orElseThrow(ModerationTargetNotFoundException::new);
         Target target = target(report);
 
-        if (action == Action.REVIEW) {
-            if (target.status() != ModerationStatus.VISIBLE) throw new ModerationStateConflictException();
-            target.markInReview();
-            audit.record(admin, AdminAction.CONTENT_IN_REVIEW, report.getTargetType().name(), report.getTargetId(),
-                    Map.of("reportId", reportId.toString()));
-        } else if (action == Action.RESTORE) {
-            if (target.status() != ModerationStatus.IN_REVIEW) throw new ModerationStateConflictException();
-            target.restore();
-            if (report.getTargetType() == ReportTargetType.POST) {
-                comments.restorePostComments(report.getTargetId());
-            }
-            report.resolve();
-            audit.record(admin, AdminAction.CONTENT_RESTORED, report.getTargetType().name(), report.getTargetId(),
-                    Map.of("reportId", reportId.toString()));
-        } else if (action == Action.REMOVE) {
-            if (target.status() == ModerationStatus.REMOVED) throw new ModerationStateConflictException();
-            target.remove();
-            if (report.getTargetType() == ReportTargetType.POST) {
-                comments.removePostComments(report.getTargetId());
-                reports.resolvePendingCommentReportsForPost(report.getTargetId());
-            }
-            report.resolve();
-            audit.record(admin, AdminAction.CONTENT_REMOVED, report.getTargetType().name(), report.getTargetId(),
-                    Map.of("reportId", reportId.toString()));
-        } else {
-            report.dismiss();
-            audit.record(admin, AdminAction.REPORT_DISMISSED, report.getTargetType().name(), report.getTargetId(),
-                    Map.of("reportId", reportId.toString()));
+        switch (action) {
+            case REVIEW -> applyReview(report, target, admin);
+            case RESTORE -> applyRestore(report, target, admin);
+            case REMOVE -> applyRemove(report, target, admin);
+            case DISMISS -> applyDismiss(report, admin);
         }
         reports.flush();
         return response(report);
+    }
+
+    private void applyReview(Report report, Target target, AppUser admin) {
+        if (target.status() != ModerationStatus.VISIBLE) throw new ModerationStateConflictException();
+        target.markInReview();
+        recordAudit(admin, AdminAction.CONTENT_IN_REVIEW, report);
+    }
+
+    private void applyRestore(Report report, Target target, AppUser admin) {
+        if (target.status() != ModerationStatus.IN_REVIEW) throw new ModerationStateConflictException();
+        target.restore();
+        if (report.getTargetType() == ReportTargetType.POST) {
+            comments.restorePostComments(report.getTargetId());
+        }
+        report.resolve();
+        recordAudit(admin, AdminAction.CONTENT_RESTORED, report);
+    }
+
+    private void applyRemove(Report report, Target target, AppUser admin) {
+        if (target.status() == ModerationStatus.REMOVED) throw new ModerationStateConflictException();
+        target.remove();
+        if (report.getTargetType() == ReportTargetType.POST) {
+            comments.removePostComments(report.getTargetId());
+            reports.resolvePendingCommentReportsForPost(report.getTargetId());
+        }
+        report.resolve();
+        recordAudit(admin, AdminAction.CONTENT_REMOVED, report);
+    }
+
+    private void applyDismiss(Report report, AppUser admin) {
+        report.dismiss();
+        recordAudit(admin, AdminAction.REPORT_DISMISSED, report);
+    }
+
+    private void recordAudit(AppUser admin, AdminAction action, Report report) {
+        audit.record(admin, action, report.getTargetType().name(), report.getTargetId(),
+                Map.of("reportId", report.getId().toString()));
     }
 
     private Target target(Report report) {
