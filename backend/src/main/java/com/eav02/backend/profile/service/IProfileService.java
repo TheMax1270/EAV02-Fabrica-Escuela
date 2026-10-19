@@ -13,6 +13,9 @@ public interface IProfileService {
 
     ProfileResponse getPublic(UUID profileId);
 
+    // NUEVO: Agregas este método para que coincida con el controlador
+    ProfileResponse getByUserId(UUID userId);
+
     ProfileResponse updateOwn(UUID userId, ProfileRequest request);
 
     ProfileResponse update(UUID profileId, UUID userId, ProfileRequest request);
