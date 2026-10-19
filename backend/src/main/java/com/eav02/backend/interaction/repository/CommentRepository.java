@@ -30,6 +30,10 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
 
     @Query("select count(c) from Comment c where c.post.id = :postId and c.moderationStatus = com.eav02.backend.moderation.entity.ModerationStatus.VISIBLE")
     long countVisiblePostComments(@Param("postId") UUID postId);
+
+    @Modifying
+    @Query(value = "WITH RECURSIVE descendants AS (SELECT id FROM interactions.comments WHERE id = :commentId UNION ALL SELECT c.id FROM interactions.comments c JOIN descendants d ON c.parent_comment_id = d.id) UPDATE interactions.comments SET moderation_status = 'REMOVED' WHERE id IN (SELECT id FROM descendants)", nativeQuery = true)
+    int removeCommentTree(@Param("commentId") UUID commentId);
         @Query("select c from Comment c join fetch c.user left join fetch c.project left join fetch c.post left join fetch c.parent where c.id = :id")
     Optional<Comment> findWithTargetById(@Param("id") UUID id);
 
@@ -49,6 +53,6 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
         UUID getParentId();
         long getTotal();
     }
-    @Query("select c.parent.id as parentId, count(c) as total from Comment c where c.parent.id in :ids group by c.parent.id")
+    @Query("select c.parent.id as parentId, count(c) as total from Comment c where c.parent.id in :ids and c.moderationStatus = com.eav02.backend.moderation.entity.ModerationStatus.VISIBLE group by c.parent.id")
     List<ReplyCount> countReplies(@Param("ids") List<UUID> ids);
 }

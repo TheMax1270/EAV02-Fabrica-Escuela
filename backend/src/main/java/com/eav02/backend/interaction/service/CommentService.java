@@ -51,6 +51,13 @@ public class CommentService {
         if (!projects.existsById(id)) throw new ProjectNotFoundException();
         return response(comments.findProjectRoots(id, pageable(page, size)), true);
     }
+
+    @Transactional
+    public void removeOwn(UUID commentId, UUID userId) {
+        var comment = comments.findWithTargetById(commentId).orElseThrow(CommentNotFoundException::new);
+        if (!comment.getUser().getId().equals(userId)) throw new CommentOwnershipException();
+        comments.removeCommentTree(commentId);
+    }
     @Transactional(readOnly = true)
     public CommentPageResponse listPost(UUID id, int page, int size) {
         if (!posts.existsById(id)) throw new PostNotFoundException();
@@ -75,7 +82,7 @@ public class CommentService {
     }
     private CommentPageResponse response(Page<Comment> result, boolean roots) {
         List<UUID> ids = result.getContent().stream().map(Comment::getId).toList();
-        Map<UUID, Long> counts = roots && !ids.isEmpty() ? comments.countReplies(ids).stream()
+        Map<UUID, Long> counts = !ids.isEmpty() ? comments.countReplies(ids).stream()
                 .collect(Collectors.toMap(CommentRepository.ReplyCount::getParentId, CommentRepository.ReplyCount::getTotal)) : Map.of();
         return new CommentPageResponse(result.getContent().stream().map(c -> CommentResponse.from(c, counts.getOrDefault(c.getId(), 0L))).toList(),
                 result.getNumber(), result.getSize(), result.getTotalElements(), result.getTotalPages());

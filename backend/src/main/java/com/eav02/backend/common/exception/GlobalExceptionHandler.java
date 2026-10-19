@@ -203,4 +203,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("OWN_CONTENT_REPORT",
                 "No puedes reportar tu propio contenido", Map.of()));
     }
+
+    @ExceptionHandler(CommentOwnershipException.class)
+    ResponseEntity<ApiError> commentOwnership(CommentOwnershipException failure) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError("COMMENT_FORBIDDEN",
+                "Solo puedes eliminar tus propios comentarios", Map.of()));
+    }
 }

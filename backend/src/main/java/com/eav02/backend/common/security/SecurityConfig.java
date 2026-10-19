@@ -67,6 +67,7 @@ public class SecurityConfig {
                                 "/api/v1/comments/{id}/replies").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/posts/{id}/comments", "/api/v1/projects/{id}/comments",
                                 "/api/v1/comments/{id}/replies").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/comments/{id}").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/posts/{id}/likes/me", "/api/v1/projects/{id}/likes/me").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/posts/{id}/likes/me", "/api/v1/projects/{id}/likes/me").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/posts").authenticated()
