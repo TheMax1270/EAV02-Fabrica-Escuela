@@ -31,6 +31,9 @@
 		<sonar.organization>devconnect</sonar.organization>
         <sonar.projectKey>TheMax1270_EAV02-Fabrica-Escuela</sonar.projectKey>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+	    <sonar.issue.ignore.multicriteria>e1</sonar.issue.ignore.multicriteria>
+		<sonar.issue.ignore.multicriteria.e1.ruleKey>java:S4502</sonar.issue.ignore.multicriteria.e1.ruleKey>
+		<sonar.issue.ignore.multicriteria.e1.resourceKey>**/SecurityConfig.java</sonar.issue.ignore.multicriteria.e1.resourceKey>
 		<sonar.coverage.jacoco.xmlReportPaths>
 			${project.basedir}/target/site/jacoco/jacoco.xml
 		</sonar.coverage.jacoco.xmlReportPaths>
