@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.eav02.backend.profile.dto.ProfileRequest;
 import com.eav02.backend.profile.dto.ProfileResponse;
-import com.eav02.backend.profile.service.ProfileService;
+import com.eav02.backend.profile.service.IProfileService;
 
 import jakarta.validation.Valid;
 
@@ -24,9 +24,9 @@ import jakarta.validation.Valid;
 @RequestMapping("/api/v1")
 public class ProfileController {
 
-    private final ProfileService profiles;
+    private final IProfileService profiles;
 
-    public ProfileController(ProfileService profiles) {
+    public ProfileController(IProfileService profiles) {
         this.profiles = profiles;
     }
 

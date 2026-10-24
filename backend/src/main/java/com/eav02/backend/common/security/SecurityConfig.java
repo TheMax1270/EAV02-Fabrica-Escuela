@@ -47,9 +47,9 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http, JwtDecoder decoder,
-            SessionJwtAuthenticationConverter sessionConverter) throws Exception {
+            SessionJwtAuthenticationConverter sessionConverter) {
         return http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/**")) // API stateless con JWT en cabecera: sin cookies de sesion
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -79,14 +79,15 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/v1/projects/**").authenticated()
 
                         .requestMatchers("/api/v1/profile/**").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/projects/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/profiles/**").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/api/v1/profiles/**").authenticated()
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        // Debe ir antes de GET /api/v1/profiles/** (publico), o /reports/me quedaria abierto.
                         .requestMatchers(HttpMethod.POST, "/api/v1/posts/{id}/reports", "/api/v1/comments/{id}/reports",
                                 "/api/v1/profiles/{id}/reports").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/posts/{id}/reports/me", "/api/v1/comments/{id}/reports/me",
                                 "/api/v1/profiles/{id}/reports/me").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/projects/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/profiles/**").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/profiles/**").authenticated()
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/{userId}/follow-summary",
                                 "/api/v1/users/{userId}/followers", "/api/v1/users/{userId}/following").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/{userId}/followers/me").authenticated()

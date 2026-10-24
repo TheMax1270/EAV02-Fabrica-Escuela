@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.eav02.backend.user.dto.AdminUserResponse;
 import com.eav02.backend.user.dto.UserPageResponse;
 import com.eav02.backend.user.entity.AccountStatus;
-import com.eav02.backend.user.service.AdminUserService;
+import com.eav02.backend.user.service.IAdminUserService;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -24,9 +24,9 @@ import jakarta.validation.constraints.Min;
 @RequestMapping("/api/v1/admin/users")
 public class AdminUserController {
 
-    private final AdminUserService adminUsers;
+    private final IAdminUserService adminUsers;
 
-    public AdminUserController(AdminUserService adminUsers) {
+    public AdminUserController(IAdminUserService adminUsers) {
         this.adminUsers = adminUsers;
     }
 

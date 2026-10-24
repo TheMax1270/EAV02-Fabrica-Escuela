@@ -19,7 +19,7 @@ import com.eav02.backend.user.entity.UserRole;
 import com.eav02.backend.user.repository.UserRepository;
 
 @Service
-public class RegistrationService {
+public class RegistrationService implements IRegistrationService {
 
     private final UserRepository users;
     private final PasswordEncoder passwordEncoder;

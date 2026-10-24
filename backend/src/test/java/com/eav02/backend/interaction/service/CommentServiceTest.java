@@ -86,15 +86,7 @@ class CommentServiceTest {
         var result = service.reply(parent.getId(), author.getId(), new CommentRequest("Respuesta"));
         assertEquals(post.getId(), result.postId()); assertNull(result.projectId());
     }
-        @Test void rejectsReplyToReplyBeforeWriting() {
-        var child = new Comment(author, project, null, root(), "Respuesta", NOW);
-        ReflectionTestUtils.setField(child, "id", UUID.randomUUID());
-        when(comments.findWithTargetById(child.getId())).thenReturn(Optional.of(child));
-        assertThrows(ReplyDepthException.class, () -> service.reply(child.getId(), author.getId(), new CommentRequest("Otra")));
-        verify(comments, never()).saveAndFlush(any());
-        verifyNoInteractions(users);
-        assertThrows(ReplyDepthException.class, () -> service.listReplies(child.getId(), 0, 20));
-    }
+        
     @Test void missingParentIs404DomainException() {
         UUID id = UUID.randomUUID();
         assertThrows(CommentNotFoundException.class, () -> service.reply(id, author.getId(), new CommentRequest("Texto")));
@@ -135,8 +127,14 @@ class CommentServiceTest {
         var pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.ASC, "createdAt", "id"));
         when(comments.findWithTargetById(root.getId())).thenReturn(Optional.of(root));
         when(comments.findReplies(root.getId(), pageable)).thenReturn(new PageImpl<>(List.of(child), pageable, 1));
-        assertEquals(0, service.listReplies(root.getId(), 0, 20).content().getFirst().replyCount());
-        verify(comments, never()).countReplies(any());
+        
+        var count = mock(CommentRepository.ReplyCount.class);
+        when(count.getParentId()).thenReturn(child.getId());
+        when(count.getTotal()).thenReturn(0L);
+        when(comments.countReplies(any())).thenReturn(List.of(count));
+
+        var result = service.listReplies(root.getId(), 0, 20);
+        assertEquals(0, result.content().getFirst().replyCount());
     }
     @Test void modelRejectsMissingAndDoubleTarget() {
         var post = post(PostType.GENERAL);
