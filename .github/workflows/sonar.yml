@@ -10,6 +10,7 @@ jobs:
   analysis:
     name: Analisis de calidad (backend + frontend)
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -53,7 +54,13 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: >
-          mvn -B org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+          mvn -B
+          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+          -Dsonar.scanner.skipJreProvisioning=true
+          -Dsonar.javascript.lcov.reportPaths=../frontend/coverage/lcov.info
+          -Dsonar.sources=src/main/java,../frontend/src
+          -Dsonar.tests=src/test/java,../frontend/src
+          -Dsonar.test.inclusions=**/*.test.tsx,**/*.test.ts
           -Dsonar.javascript.lcov.reportPaths=../frontend/coverage/lcov.info
           -Dsonar.sources=src/main/java,../frontend/src
           -Dsonar.tests=src/test/java,../frontend/src
