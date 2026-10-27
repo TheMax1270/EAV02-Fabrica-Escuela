@@ -20,6 +20,7 @@ env:
   MIN_COVERAGE: 65        # % cobertura mínima
   MAX_DEBT_MIN: 960       # 2 días = 2 x 8 h x 60 min
   MAX_COMPLEXITY: 50      # debe ser menor a este valor (se mide por método)
+  MAX_FINDINGS: ""        # hallazgos Minor o superior: vacío = solo informativo; con un número, se califica (<= valor)
 
 jobs:
   build:
@@ -199,8 +200,9 @@ jobs:
           VULN=$(echo "$RESP_V" | jq -r '.total // "N/A"')
 
           RESP_S=$(curl -s -u "$SONAR_TOKEN:" \
-            "$API/issues/search?componentKeys=$PROJECT_KEY&$SCOPE&severities=MINOR,MAJOR,CRITICAL,BLOCKER&resolved=false&ps=1")
+            "$API/issues/search?componentKeys=$PROJECT_KEY&$SCOPE&severities=MINOR,MAJOR,CRITICAL,BLOCKER&resolved=false&facets=severities&ps=1")
           SEV=$(echo "$RESP_S" | jq -r '.total // "N/A"')
+          SEV_DETAIL=$(echo "$RESP_S" | jq -r '[.facets[]? | select(.property=="severities") | .values[] | select(.count > 0) | "\(.val | ascii_downcase)=\(.count)"] | join(" · ")')
 
           ok()  { echo "✅"; }
           bad() { echo "❌"; }
@@ -209,7 +211,13 @@ jobs:
           DEBT_S=$([ -n "$DEBT" ] && [ "$DEBT" -le "$MAX_DEBT_MIN" ] && ok || bad)
           CX_S=$([ -n "$M_MAX" ] && [ "$M_MAX" -lt "$MAX_COMPLEXITY" ] && ok || bad)
           VULN_S=$([ "$VULN" = "0" ] && ok || bad)
-          SEV_S=$([ "$SEV" = "0" ] && ok || bad)
+          if [ -n "$MAX_FINDINGS" ] && [ "$SEV" != "N/A" ]; then
+            SEV_S=$([ "$SEV" -le "$MAX_FINDINGS" ] && ok || bad)
+            SEV_META="≤ $MAX_FINDINGS"
+          else
+            SEV_S="ℹ️"
+            SEV_META="informativo"
+          fi
 
           {
             echo "### Resultado de calidad ($SCOPE)"
@@ -219,7 +227,7 @@ jobs:
             echo "| Deuda técnica | ${DEBT:-N/A} min | ≤ ${MAX_DEBT_MIN} min | $DEBT_S |"
             printf '| Complejidad ciclomática por método (máximo: `%s`) | %s | cada método < %s | %s |\n' "$M_NAME" "${M_MAX:-N/A}" "$MAX_COMPLEXITY" "$CX_S"
             echo "| Vulnerabilidades críticas | $VULN | 0 | $VULN_S |"
-            echo "| Hallazgos abiertos (severidad Minor o superior) | $SEV | 0 | $SEV_S |"
+            echo "| Hallazgos abiertos (severidad Minor o superior) | $SEV ($SEV_DETAIL) | $SEV_META | $SEV_S |"
             echo ""
             echo "Métodos analizados: $M_TOTAL · métodos con complejidad ≥ ${MAX_COMPLEXITY}: $M_OVER · métodos con complejidad > 10 (referencia de buena práctica): $M_WARN"
             echo ""
@@ -232,14 +240,20 @@ jobs:
             done
             echo ""
             echo "#### Referencia (SonarCloud, informativo): complejidad por archivo y por módulo"
-            echo "Archivo más complejo: $CX_FILE ($CX_FMAX)"
+            if [ -z "$MODS" ]; then
+              echo "SonarCloud no devolvió archivos de código backend para este análisis (en un Pull Request solo evalúa los archivos modificados). La complejidad por método de arriba sí cubre todo el proyecto, porque sale del reporte JaCoCo."
+            else
+              echo "Archivo más complejo: $CX_FILE ($CX_FMAX)"
+              echo ""
+              echo "| Módulo | Complejidad acumulada |"
+              echo "|---|---|"
+              while IFS='|' read -r NAME CX; do
+                [ -z "$NAME" ] && continue
+                echo "| $NAME | $CX |"
+              done <<< "$MODS"
+            fi
             echo ""
-            echo "| Módulo | Complejidad acumulada |"
-            echo "|---|---|"
-            while IFS='|' read -r NAME CX; do
-              [ -z "$NAME" ] && continue
-              echo "| $NAME | $CX |"
-            done <<< "$MODS"
+            echo "Nota: en un Pull Request, las cifras de SonarCloud (deuda técnica, hallazgos, referencia por archivo y módulo) corresponden a los archivos modificados; el análisis de la rama principal refleja el proyecto completo."
           } >> "$GITHUB_STEP_SUMMARY"
 
           if echo "$COV_S$DEBT_S$CX_S$VULN_S$SEV_S" | grep -q "❌"; then
