@@ -96,6 +96,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/{userId}/blocks/me").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/{userId}/blocks/me").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/me/following").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/conversations",
+                                "/api/v1/conversations/{participantId}/messages").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/conversations/{participantId}/messages").authenticated()
                         .anyRequest().denyAll())
                 .build();
     }
