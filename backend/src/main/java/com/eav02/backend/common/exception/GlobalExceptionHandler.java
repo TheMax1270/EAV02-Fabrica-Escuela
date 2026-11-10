@@ -145,6 +145,18 @@ public class GlobalExceptionHandler {
                 "No puedes seguir tu propia cuenta", Map.of()));
     }
 
+    @ExceptionHandler(SelfBlockException.class)
+    ResponseEntity<ApiError> selfBlock(SelfBlockException failure) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("SELF_BLOCK_FORBIDDEN",
+                "No puedes bloquearte a ti mismo", Map.of()));
+    }
+
+    @ExceptionHandler(BlockedUserException.class)
+    ResponseEntity<ApiError> blockedUser(BlockedUserException failure) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError("USER_BLOCKED",
+                "La interacción no está permitida porque existe un bloqueo", Map.of()));
+    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     ResponseEntity<ApiError> constraintViolation(ConstraintViolationException failure) {
         Map<String, String> errors = new LinkedHashMap<>();

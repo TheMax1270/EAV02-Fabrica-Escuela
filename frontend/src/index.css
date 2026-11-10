@@ -362,6 +362,21 @@ a { color: inherit; }
 .public-profile-links h3 { width: 100%; margin-bottom: 0; }
 .public-profile-links a { color: #c4b9ff; font-size: .88rem; font-weight: 650; text-decoration: none; }
 .public-profile-links a:hover { text-decoration: underline; }
+.profile-social-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-block: 20px; }
+.profile-public-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--border); }
+.profile-public-header .public-profile-heading { border-bottom: 0; padding-bottom: 0; }
+.profile-action-row { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+.message-button { color: #d7efff; border-color: #3b8dcc; background: #153450; }
+.message-button:hover:not(:disabled) { border-color: #69b8ef; background: #1b4769; }
+.message-button, .follow-row .button, .profile-more-menu .block-controls button, .report-trigger { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.profile-more { position: relative; }
+.more-button { min-width: 76px; }
+.profile-more-menu { position: absolute; top: calc(100% + 8px); right: 0; z-index: 20; display: grid; gap: 10px; min-width: 220px; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface-raised); box-shadow: var(--shadow-panel); }
+.profile-more-menu .report-control, .profile-more-menu .block-controls { width: 100%; }
+.profile-more-menu .report-trigger, .profile-more-menu .block-controls button { width: 100%; padding: 10px 12px; text-align: left; }
+.block-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.blocked-note { color: var(--danger); font-size: .8rem; }
+.block-feedback { margin: 8px 0 0; color: var(--success); font-size: .8rem; line-height: 1.4; }
 .loading-note { color: var(--muted); }
 .loading-note { margin-top: 32px; color: var(--muted); }
 .account-main .form-error { width: min(100%, 660px); margin-top: 28px; }
@@ -582,6 +597,8 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--cyan); outline-
   .project-meta { grid-template-columns: 1fr; gap: 16px; }
   .project-card-actions .button { width: 100%; }
   .public-profile-heading { align-items: flex-start; flex-wrap: wrap; }
+  .profile-public-header { align-items: flex-start; flex-direction: column; }
+  .profile-action-row { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
   .profile-edit-button { width: 100%; margin-left: 0; }
   .admin-toolbar { flex-direction: column; align-items: stretch; gap: 8px; margin-top: 28px; }
   .admin-filter { min-width: 0; }
@@ -600,6 +617,7 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--cyan); outline-
 .follow-controls { margin: 18px 0 8px; color: var(--muted); font-size: .88rem; }
 .follow-row { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
 .follow-row strong { color: var(--text); }
+.public-profile > .follow-controls { margin: 18px 0 0; padding-bottom: 18px; border-bottom: 1px solid var(--border); }
 .follow-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; padding: 0; list-style: none; }
 .follow-list a { color: var(--accent); text-decoration: none; }
 .admin-user-link { color: var(--accent); font-weight: 700; text-decoration: none; }
