@@ -11,6 +11,7 @@ import PostsPage from '../pages/PostsPage'
 import ProjectDetailPage from '../pages/ProjectDetailPage'
 import DeveloperProfilePage from '../pages/DeveloperProfilePage'
 import AdminModerationPage from '../pages/AdminModerationPage'
+import MessagesPage from '../pages/MessagesPage'
 
 export default function AppRoutes() {
   return (
@@ -26,6 +27,7 @@ export default function AppRoutes() {
       <Route path="/admin/reports" element={<ProtectedRoute role="ADMIN"><AdminModerationPage /></ProtectedRoute>} />
       <Route path="/projects" element={<ProtectedRoute><MyProjectsPage /></ProtectedRoute>} />
       <Route path="/developers/:userId" element={<DeveloperProfilePage />} />
+      <Route path="/messages/:userId?" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
     </Routes>
   )
 }

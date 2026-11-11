@@ -157,6 +157,18 @@ public class GlobalExceptionHandler {
                 "La interacción no está permitida porque existe un bloqueo", Map.of()));
     }
 
+    @ExceptionHandler(SelfMessageException.class)
+    ResponseEntity<ApiError> selfMessage(SelfMessageException failure) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("SELF_MESSAGE_FORBIDDEN",
+                "No puedes enviarte mensajes a ti mismo", Map.of()));
+    }
+
+    @ExceptionHandler(InvalidMessageCursorException.class)
+    ResponseEntity<ApiError> invalidMessageCursor(InvalidMessageCursorException failure) {
+        return ResponseEntity.badRequest().body(new ApiError("INVALID_MESSAGE_CURSOR",
+                "El cursor de mensajes no es valido para esta conversacion", Map.of()));
+    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     ResponseEntity<ApiError> constraintViolation(ConstraintViolationException failure) {
         Map<String, String> errors = new LinkedHashMap<>();
