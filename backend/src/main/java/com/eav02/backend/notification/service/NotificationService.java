@@ -95,8 +95,8 @@ public class NotificationService {
         if (recipientId.equals(actorId)) {
             return;
         }
-        notifications.insert(UUID.randomUUID(), recipientId, actorId, type.name(), targetType.name(), targetId,
-                abbreviate(label), clock.instant());
+        notifications.insert(recipientId, actorId, type.name(), targetType.name(), targetId,
+            abbreviate(label), clock.instant());
     }
 
     private static String postLabel(Post post) {

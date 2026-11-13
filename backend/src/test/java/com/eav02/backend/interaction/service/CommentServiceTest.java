@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 import static org.mockito.ArgumentMatchers.any;
 import java.time.*;
 import java.util.*;
+import java.util.Objects;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -36,6 +37,7 @@ class CommentServiceTest {
     CommentService service;
     AppUser author;
     Project project;
+    
     @BeforeEach void setup() {
         service = new CommentService(comments, projects, posts, users, Clock.fixed(NOW, ZoneOffset.UTC), notifications);
         author = new AppUser("Ada", "ada", "ada@example.com", "hash", UserRole.DEVELOPER, true, NOW);

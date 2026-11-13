@@ -19,9 +19,9 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     @Modifying
     @Query(value = "INSERT INTO notifications.notifications "
             + "(id, recipient_id, actor_id, type, target_type, target_id, target_label, created_at) "
-            + "VALUES (:id, :recipientId, :actorId, :type, :targetType, :targetId, :targetLabel, :createdAt) "
+            + "VALUES (gen_random_uuid(), :recipientId, :actorId, :type, :targetType, :targetId, :targetLabel, :createdAt) "
             + "ON CONFLICT DO NOTHING", nativeQuery = true)
-    int insert(@Param("id") UUID id, @Param("recipientId") UUID recipientId, @Param("actorId") UUID actorId,
+    int insert(@Param("recipientId") UUID recipientId, @Param("actorId") UUID actorId,
             @Param("type") String type, @Param("targetType") String targetType,
             @Param("targetId") UUID targetId, @Param("targetLabel") String targetLabel,
             @Param("createdAt") Instant createdAt);

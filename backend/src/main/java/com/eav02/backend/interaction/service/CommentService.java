@@ -3,6 +3,7 @@ package com.eav02.backend.interaction.service;
 import java.time.Clock;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
@@ -52,10 +53,14 @@ public class CommentService {
     public CommentResponse reply(UUID id, UUID userId, CommentRequest request) {
         var parent = root(id);
         var user = users.findById(userId).orElseThrow(UserNotFoundException::new);
-        var saved = comments.saveAndFlush(new Comment(user, parent.getProject(), parent.getPost(), parent,
-                request.content(), clock.instant()));
-        if (parent.getProject() != null) notifications.commentOnProject(parent.getProject(), userId);
-        else notifications.commentOnPost(parent.getPost(), userId);
+        var project = parent.getProject();
+        var post = parent.getPost();
+        var saved = comments.saveAndFlush(new Comment(user, project, post, parent, request.content(), clock.instant()));
+        if (project != null) {
+            notifications.commentOnProject(project, userId);
+        } else {
+            notifications.commentOnPost(Objects.requireNonNull(post), userId);
+        }
         return CommentResponse.from(saved, 0);
     }
     @Transactional(readOnly = true)
