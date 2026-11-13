@@ -233,4 +233,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError("COMMENT_FORBIDDEN",
                 "Solo puedes eliminar tus propios comentarios", Map.of()));
     }
+
+    @ExceptionHandler(NotificationNotFoundException.class)
+    ResponseEntity<ApiError> notificationNotFound(NotificationNotFoundException failure) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError("NOTIFICATION_NOT_FOUND",
+                "Notificacion no encontrada", Map.of()));
+    }
 }

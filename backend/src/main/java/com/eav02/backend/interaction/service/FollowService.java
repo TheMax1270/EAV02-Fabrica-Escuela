@@ -19,6 +19,7 @@ import com.eav02.backend.interaction.dto.FollowPageResponse;
 import com.eav02.backend.interaction.dto.FollowSummaryResponse;
 import com.eav02.backend.interaction.dto.FollowedIdsResponse;
 import com.eav02.backend.interaction.repository.UserFollowRepository;
+import com.eav02.backend.notification.service.NotificationService;
 import com.eav02.backend.interaction.repository.UserBlockRepository;
 import com.eav02.backend.user.entity.AppUser;
 import com.eav02.backend.user.repository.UserRepository;
@@ -30,18 +31,24 @@ public class FollowService {
     private final UserRepository users;
     private final Clock clock;
     private final UserBlockRepository blocks;
+    private final NotificationService notifications;
 
     public FollowService(UserFollowRepository follows, UserRepository users, Clock clock) {
-        this(follows, users, clock, null);
+        this(follows, users, clock, null, null);
+    }
+    public FollowService(UserFollowRepository follows, UserRepository users, Clock clock,
+            UserBlockRepository blocks) {
+        this(follows, users, clock, blocks, null);
     }
 
     @Autowired
     public FollowService(UserFollowRepository follows, UserRepository users, Clock clock,
-            UserBlockRepository blocks) {
+            UserBlockRepository blocks, NotificationService notifications) {
         this.follows = follows;
         this.users = users;
         this.clock = clock;
         this.blocks = blocks;
+        this.notifications = notifications;
     }
 
     @Transactional
@@ -53,7 +60,10 @@ public class FollowService {
             throw new BlockedUserException();
         }
         requireActiveUser(followedId);
-        follows.insertFollow(UUID.randomUUID(), followerId, followedId, clock.instant());
+        int created = follows.insertFollow(UUID.randomUUID(), followerId, followedId, clock.instant());
+        if (created > 0 && notifications != null) {
+            notifications.newFollower(followerId, followedId);
+        }
     }
 
     @Transactional

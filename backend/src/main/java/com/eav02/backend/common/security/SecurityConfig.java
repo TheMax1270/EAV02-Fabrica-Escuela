@@ -99,6 +99,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/conversations",
                                 "/api/v1/conversations/{participantId}/messages").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/conversations/{participantId}/messages").authenticated()
+                        .requestMatchers("/api/v1/notifications", "/api/v1/notifications/**").authenticated()
                         .anyRequest().denyAll())
                 .build();
     }

@@ -32,6 +32,7 @@ import com.eav02.backend.messaging.entity.ConversationPair;
 import com.eav02.backend.messaging.entity.Message;
 import com.eav02.backend.messaging.repository.ConversationRepository;
 import com.eav02.backend.messaging.repository.MessageRepository;
+import com.eav02.backend.notification.service.NotificationService;
 import com.eav02.backend.user.entity.AppUser;
 import com.eav02.backend.user.repository.UserRepository;
 
@@ -43,14 +44,16 @@ public class MessagingService {
     private final UserRepository users;
     private final UserBlockRepository blocks;
     private final Clock clock;
+    private final NotificationService notifications;
 
     public MessagingService(ConversationRepository conversations, MessageRepository messages, UserRepository users,
-            UserBlockRepository blocks, Clock clock) {
+            UserBlockRepository blocks, Clock clock, NotificationService notifications) {
         this.conversations = conversations;
         this.messages = messages;
         this.users = users;
         this.blocks = blocks;
         this.clock = clock;
+        this.notifications = notifications;
     }
 
     @Transactional
@@ -70,6 +73,7 @@ public class MessagingService {
         Message message = messages.save(new Message(conversation, users.getReferenceById(senderId),
                 request.content(), now));
         conversation.registerMessage(now);
+        notifications.newMessage(senderId, recipientId);
         return MessageResponse.from(message, recipientId);
     }
 
