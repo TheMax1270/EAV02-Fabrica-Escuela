@@ -40,6 +40,7 @@ import com.eav02.backend.messaging.repository.MessageRepository;
 import com.eav02.backend.user.entity.AppUser;
 import com.eav02.backend.user.entity.UserRole;
 import com.eav02.backend.user.repository.UserRepository;
+import com.eav02.backend.notification.service.NotificationService;
 
 @ExtendWith(MockitoExtension.class)
 class MessagingServiceTest {
@@ -51,6 +52,7 @@ class MessagingServiceTest {
     @Mock MessageRepository messages;
     @Mock UserRepository users;
     @Mock UserBlockRepository blocks;
+    @Mock NotificationService notifications;
 
     private MessagingService service;
     private AppUser sender;
@@ -59,7 +61,7 @@ class MessagingServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new MessagingService(conversations, messages, users, blocks, Clock.fixed(NOW, ZoneOffset.UTC));
+        service = new MessagingService(conversations, messages, users, blocks, Clock.fixed(NOW, ZoneOffset.UTC), notifications);
         sender = user(UUID.randomUUID(), "ada", true);
         recipient = user(UUID.randomUUID(), "linus", true);
         pair = ConversationPair.of(sender.getId(), recipient.getId());
@@ -79,6 +81,7 @@ class MessagingServiceTest {
         verify(conversations).insertIfAbsent(any(), eq(pair.userOneId()), eq(pair.userTwoId()), eq(NOW));
         ArgumentCaptor<Message> saved = ArgumentCaptor.forClass(Message.class);
         verify(messages).save(saved.capture());
+        verify(notifications).newMessage(sender.getId(), recipient.getId());
         assertThat(saved.getValue().getSender()).isSameAs(sender);
         assertThat(saved.getValue().getConversation()).isSameAs(conversation);
         assertThat(saved.getValue().getContent()).isEqualTo("Hola");
@@ -93,7 +96,7 @@ class MessagingServiceTest {
     void rejectsMessagingSelfWithoutWriting() {
         assertThrows(SelfMessageException.class,
                 () -> service.send(sender.getId(), sender.getId(), new MessageRequest("Hola")));
-        verifyNoInteractions(conversations, messages, users, blocks);
+          verifyNoInteractions(conversations, messages, users, blocks, notifications);
     }
 
     @Test
@@ -102,7 +105,7 @@ class MessagingServiceTest {
 
         assertThrows(BlockedUserException.class,
                 () -> service.send(sender.getId(), recipient.getId(), new MessageRequest("Hola")));
-        verifyNoInteractions(conversations, messages);
+          verifyNoInteractions(conversations, messages, notifications);
     }
 
     @Test
@@ -112,7 +115,7 @@ class MessagingServiceTest {
 
         assertThrows(UserNotFoundException.class,
                 () -> service.send(sender.getId(), recipient.getId(), new MessageRequest("Hola")));
-        verifyNoInteractions(conversations, messages);
+          verifyNoInteractions(conversations, messages, notifications);
     }
 
     @Test

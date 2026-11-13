@@ -14,37 +14,49 @@ import com.eav02.backend.common.exception.*;
 import com.eav02.backend.interaction.dto.*;
 import com.eav02.backend.interaction.entity.Comment;
 import com.eav02.backend.interaction.repository.CommentRepository;
+import com.eav02.backend.notification.service.NotificationService;
 import com.eav02.backend.project.repository.ProjectRepository;
 import com.eav02.backend.post.repository.PostRepository;
 import com.eav02.backend.user.repository.UserRepository;
 
 @Service
 public class CommentService {
+    private final NotificationService notifications;
     private final CommentRepository comments;
     private final ProjectRepository projects;
     private final PostRepository posts;
     private final UserRepository users;
     private final Clock clock;
-    public CommentService(CommentRepository comments, ProjectRepository projects, PostRepository posts, UserRepository users, Clock clock) {
-        this.comments = comments; this.projects = projects; this.posts = posts; this.users = users; this.clock = clock;
-    }
+    public CommentService(CommentRepository comments, ProjectRepository projects, PostRepository posts,
+        UserRepository users, Clock clock, NotificationService notifications) {
+    this.comments = comments; this.projects = projects; this.posts = posts; this.users = users;
+    this.clock = clock; this.notifications = notifications;
+}
     @Transactional
     public CommentResponse commentProject(UUID id, UUID userId, CommentRequest request) {
         var project = projects.findById(id).orElseThrow(ProjectNotFoundException::new);
         var user = users.findById(userId).orElseThrow(UserNotFoundException::new);
-        return CommentResponse.from(comments.saveAndFlush(new Comment(user, project, null, null, request.content(), clock.instant())), 0);
+        var saved = comments.saveAndFlush(new Comment(user, project, null, null, request.content(), clock.instant()));
+        notifications.commentOnProject(project, userId);
+        return CommentResponse.from(saved, 0);
     }
     @Transactional
     public CommentResponse commentPost(UUID id, UUID userId, CommentRequest request) {
         var post = posts.findById(id).orElseThrow(PostNotFoundException::new);
         var user = users.findById(userId).orElseThrow(UserNotFoundException::new);
-        return CommentResponse.from(comments.saveAndFlush(new Comment(user, null, post, null, request.content(), clock.instant())), 0);
+        var saved = comments.saveAndFlush(new Comment(user, null, post, null, request.content(), clock.instant()));
+        notifications.commentOnPost(post, userId);
+        return CommentResponse.from(saved, 0);
     }
     @Transactional
     public CommentResponse reply(UUID id, UUID userId, CommentRequest request) {
         var parent = root(id);
         var user = users.findById(userId).orElseThrow(UserNotFoundException::new);
-        return CommentResponse.from(comments.saveAndFlush(new Comment(user, parent.getProject(), parent.getPost(), parent, request.content(), clock.instant())), 0);
+        var saved = comments.saveAndFlush(new Comment(user, parent.getProject(), parent.getPost(), parent,
+                request.content(), clock.instant()));
+        if (parent.getProject() != null) notifications.commentOnProject(parent.getProject(), userId);
+        else notifications.commentOnPost(parent.getPost(), userId);
+        return CommentResponse.from(saved, 0);
     }
     @Transactional(readOnly = true)
     public CommentPageResponse listProject(UUID id, int page, int size) {
@@ -87,4 +99,5 @@ public class CommentService {
         return new CommentPageResponse(result.getContent().stream().map(c -> CommentResponse.from(c, counts.getOrDefault(c.getId(), 0L))).toList(),
                 result.getNumber(), result.getSize(), result.getTotalElements(), result.getTotalPages());
     }
+    
 }

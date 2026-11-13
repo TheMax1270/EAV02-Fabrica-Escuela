@@ -17,6 +17,7 @@ import com.eav02.backend.common.exception.*;
 import com.eav02.backend.interaction.dto.*;
 import com.eav02.backend.interaction.entity.Comment;
 import com.eav02.backend.interaction.repository.CommentRepository;
+import com.eav02.backend.notification.service.NotificationService;
 import com.eav02.backend.project.entity.*;
 import com.eav02.backend.project.repository.ProjectRepository;
 import com.eav02.backend.post.entity.*;
@@ -31,11 +32,12 @@ class CommentServiceTest {
     @Mock ProjectRepository projects;
     @Mock PostRepository posts;
     @Mock UserRepository users;
+    @Mock NotificationService notifications;
     CommentService service;
     AppUser author;
     Project project;
     @BeforeEach void setup() {
-        service = new CommentService(comments, projects, posts, users, Clock.fixed(NOW, ZoneOffset.UTC));
+        service = new CommentService(comments, projects, posts, users, Clock.fixed(NOW, ZoneOffset.UTC), notifications);
         author = new AppUser("Ada", "ada", "ada@example.com", "hash", UserRole.DEVELOPER, true, NOW);
         ReflectionTestUtils.setField(author, "id", UUID.randomUUID());
         project = new Project(author, "Project", "Description", List.of("Java"), ProjectStatus.IN_PROGRESS, null, NOW);
