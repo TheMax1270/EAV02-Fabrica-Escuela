@@ -24,6 +24,36 @@ DevConnect es una red social para desarrolladores creada como proyecto de Fábri
 
 ## Ejecución local
 
+### Ejecutar todas las pruebas y verificaciones
+
+Desde la raíz del proyecto, ejecutar:
+
+```powershell
+npm.cmd ci --prefix frontend
+.\test-all.ps1
+```
+
+El script ejecuta el lint, las pruebas con cobertura y el build del frontend, y después
+las pruebas y verificaciones del backend. No requiere una base de datos externa para
+ejecutar las pruebas automatizadas.
+
+También se pueden ejecutar por separado:
+
+```powershell
+Set-Location frontend
+npm.cmd ci
+npm.cmd run lint
+npm.cmd test
+npm.cmd run build
+
+Set-Location ..\backend
+.\mvnw.cmd -B verify
+```
+
+GitHub Actions ejecuta estas verificaciones en cada pull request y en los cambios a
+`main` o `develop`; los reportes de cobertura quedan disponibles como artefactos de la
+ejecución.
+
 ### 1. Configurar variables de entorno
 
 En la raíz del proyecto, copiar `.env.example` como `.env`:
