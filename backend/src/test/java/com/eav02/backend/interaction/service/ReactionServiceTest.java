@@ -12,6 +12,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.eav02.backend.interaction.repository.ReactionRepository;
+import com.eav02.backend.notification.service.NotificationService;
 import com.eav02.backend.project.repository.ProjectRepository;
 import com.eav02.backend.post.repository.PostRepository;
 import com.eav02.backend.user.repository.UserRepository;
@@ -23,10 +24,11 @@ class ReactionServiceTest {
     @Mock ProjectRepository projects;
     @Mock PostRepository posts;
     @Mock UserRepository users;
+    @Mock NotificationService notifications;
     ReactionService service;
     UUID target = UUID.randomUUID(), user = UUID.randomUUID();
     Instant now = Instant.parse("2026-10-14T12:00:00Z");
-    @BeforeEach void setup() { service = new ReactionService(reactions, projects, posts, users, Clock.fixed(now, ZoneOffset.UTC)); }
+    @BeforeEach void setup() { service = new ReactionService(reactions, projects, posts, users, Clock.fixed(now, ZoneOffset.UTC), notifications); }
     void exists(boolean project) {
         if (project) when(projects.existsById(target)).thenReturn(true);
         else when(posts.existsById(target)).thenReturn(true);

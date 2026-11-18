@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { Flag } from 'lucide-react'
 import { reportError, type ReportPayload, type ReportReason } from '../api/report'
 import { useAuth } from '../context/useAuth'
 
@@ -63,7 +64,7 @@ export default function ReportButton({ onSubmit, statusCheck }: {
   return (
     <div className="report-control">
       <button className="report-trigger" type="button" onClick={() => setOpen(true)}>
-        <span aria-hidden="true">⚑</span> Reportar
+        <Flag size={20} strokeWidth={1.8} aria-hidden="true" /> Reportar
       </button>
       {open && (
         <div className="modal-overlay" role="presentation">

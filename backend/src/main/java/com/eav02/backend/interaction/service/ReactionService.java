@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.eav02.backend.common.exception.*;
 import com.eav02.backend.interaction.dto.ReactionSummaryResponse;
 import com.eav02.backend.interaction.repository.ReactionRepository;
+import com.eav02.backend.notification.service.NotificationService;
 import com.eav02.backend.project.repository.ProjectRepository;
 import com.eav02.backend.post.repository.PostRepository;
 import com.eav02.backend.user.repository.UserRepository;
@@ -18,8 +19,11 @@ public class ReactionService {
     private final PostRepository posts;
     private final UserRepository users;
     private final Clock clock;
-    public ReactionService(ReactionRepository reactions, ProjectRepository projects, PostRepository posts, UserRepository users, Clock clock) {
-        this.reactions = reactions; this.projects = projects; this.posts = posts; this.users = users; this.clock = clock;
+    private final NotificationService notifications;
+    public ReactionService(ReactionRepository reactions, ProjectRepository projects, PostRepository posts,
+            UserRepository users, Clock clock, NotificationService notifications) {
+        this.reactions = reactions; this.projects = projects; this.posts = posts; this.users = users;
+        this.clock = clock; this.notifications = notifications;
     }
     private void target(UUID id, boolean project) {
         if (project && !projects.existsById(id)) throw new ProjectNotFoundException();
@@ -29,7 +33,12 @@ public class ReactionService {
     public void like(UUID id, boolean project, UUID userId) {
         target(id, project);
         if (!users.existsById(userId)) throw new UserNotFoundException();
-        reactions.insertLike(UUID.randomUUID(), userId, project ? id : null, project ? null : id, clock.instant());
+        int inserted = reactions.insertLike(UUID.randomUUID(), userId, project ? id : null, project ? null : id, clock.instant());
+        if (inserted > 0) notifyOwner(id, project, userId);
+    }
+    private void notifyOwner(UUID id, boolean project, UUID actorId) {
+        if (project) projects.findWithUserById(id).ifPresent(found -> notifications.likeOnProject(found, actorId));
+        else posts.findWithUserById(id).ifPresent(found -> notifications.likeOnPost(found, actorId));
     }
     @Transactional
     public void unlike(UUID id, boolean project, UUID userId) {

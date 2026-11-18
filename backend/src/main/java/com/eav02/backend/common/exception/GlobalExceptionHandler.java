@@ -145,6 +145,30 @@ public class GlobalExceptionHandler {
                 "No puedes seguir tu propia cuenta", Map.of()));
     }
 
+    @ExceptionHandler(SelfBlockException.class)
+    ResponseEntity<ApiError> selfBlock(SelfBlockException failure) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("SELF_BLOCK_FORBIDDEN",
+                "No puedes bloquearte a ti mismo", Map.of()));
+    }
+
+    @ExceptionHandler(BlockedUserException.class)
+    ResponseEntity<ApiError> blockedUser(BlockedUserException failure) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError("USER_BLOCKED",
+                "La interacción no está permitida porque existe un bloqueo", Map.of()));
+    }
+
+    @ExceptionHandler(SelfMessageException.class)
+    ResponseEntity<ApiError> selfMessage(SelfMessageException failure) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ApiError("SELF_MESSAGE_FORBIDDEN",
+                "No puedes enviarte mensajes a ti mismo", Map.of()));
+    }
+
+    @ExceptionHandler(InvalidMessageCursorException.class)
+    ResponseEntity<ApiError> invalidMessageCursor(InvalidMessageCursorException failure) {
+        return ResponseEntity.badRequest().body(new ApiError("INVALID_MESSAGE_CURSOR",
+                "El cursor de mensajes no es valido para esta conversacion", Map.of()));
+    }
+
     @ExceptionHandler(ConstraintViolationException.class)
     ResponseEntity<ApiError> constraintViolation(ConstraintViolationException failure) {
         Map<String, String> errors = new LinkedHashMap<>();
@@ -208,5 +232,11 @@ public class GlobalExceptionHandler {
     ResponseEntity<ApiError> commentOwnership(CommentOwnershipException failure) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError("COMMENT_FORBIDDEN",
                 "Solo puedes eliminar tus propios comentarios", Map.of()));
+    }
+
+    @ExceptionHandler(NotificationNotFoundException.class)
+    ResponseEntity<ApiError> notificationNotFound(NotificationNotFoundException failure) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiError("NOTIFICATION_NOT_FOUND",
+                "Notificacion no encontrada", Map.of()));
     }
 }

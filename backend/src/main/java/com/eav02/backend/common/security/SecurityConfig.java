@@ -90,9 +90,16 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/{userId}/follow-summary",
                                 "/api/v1/users/{userId}/followers", "/api/v1/users/{userId}/following").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/{userId}/block-summary").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/api/v1/users/{userId}/followers/me").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/{userId}/followers/me").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/users/{userId}/blocks/me").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/{userId}/blocks/me").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/me/following").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/conversations",
+                                "/api/v1/conversations/{participantId}/messages").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/conversations/{participantId}/messages").authenticated()
+                        .requestMatchers("/api/v1/notifications", "/api/v1/notifications/**").authenticated()
                         .anyRequest().denyAll())
                 .build();
     }
