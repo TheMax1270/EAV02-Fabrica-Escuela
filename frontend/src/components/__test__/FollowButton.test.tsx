@@ -5,11 +5,15 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import FollowButton from '../FollowButton'
 import { getFollowSummary, setFollowing } from '../../api/follow'
+import { getBlockSummary } from '../../api/block'
 import { useAuth } from '../../context/useAuth'
 
 vi.mock('../../api/follow', () => ({
   getFollowSummary: vi.fn(),
   setFollowing: vi.fn(),
+}))
+vi.mock('../../api/block', () => ({
+  getBlockSummary: vi.fn(),
 }))
 vi.mock('../../api/interaction', () => ({
   interactionError: (_failure: unknown, fallback: string) => fallback,
@@ -18,12 +22,14 @@ vi.mock('../../context/useAuth')
 
 const mockedGetFollowSummary = vi.mocked(getFollowSummary)
 const mockedSetFollowing = vi.mocked(setFollowing)
+const mockedGetBlockSummary = vi.mocked(getBlockSummary)
 const mockedUseAuth = vi.mocked(useAuth)
 
 describe('FollowButton', () => {
   beforeEach(() => {
     mockedGetFollowSummary.mockReset()
     mockedSetFollowing.mockReset()
+    mockedGetBlockSummary.mockReset().mockResolvedValue({ blockedByMe: false, blockedMe: false })
     mockedUseAuth.mockReturnValue({
       user: { id: 'current-user', username: 'ada', role: 'DEVELOPER', enabled: true },
       isAuthenticated: true,
@@ -90,5 +96,21 @@ describe('FollowButton', () => {
 
     expect(await screen.findByRole('link', { name: /inicia sesión para seguir/i }))
       .toHaveAttribute('href', '/login')
+  })
+
+  it.each([
+    [{ blockedByMe: true, blockedMe: false }, /has bloqueado a este usuario/i],
+    [{ blockedByMe: false, blockedMe: true }, /te ha bloqueado/i],
+  ])('does not offer a follow action when blocked (%o)', async (blockSummary, message) => {
+    mockedGetFollowSummary.mockResolvedValue({
+      followersCount: 3,
+      followingCount: 2,
+      followedByMe: false,
+    })
+    mockedGetBlockSummary.mockResolvedValue(blockSummary)
+    render(<MemoryRouter><FollowButton userId="developer-1" /></MemoryRouter>)
+
+    expect(await screen.findByText(message)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /seguir/i })).not.toBeInTheDocument()
   })
 })

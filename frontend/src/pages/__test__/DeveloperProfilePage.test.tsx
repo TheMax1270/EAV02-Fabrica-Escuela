@@ -1,6 +1,7 @@
 import '@testing-library/jest-dom/vitest'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import DeveloperProfilePage from '../DeveloperProfilePage'
 import { getProfileByUser } from '../../api/profile'
@@ -12,9 +13,12 @@ vi.mock('../../api/report', () => ({
 }))
 vi.mock('../../context/useAuth')
 vi.mock('../../components/SiteHeader', () => ({ default: () => <header /> }))
-vi.mock('../../components/FollowButton', () => ({ default: () => <button type="button">Seguir</button> }))
+vi.mock('../../components/FollowButton', () => ({
+  default: ({ countsOnly }: { countsOnly?: boolean }) => countsOnly ? <div /> : <button type="button">Seguir</button>,
+}))
 vi.mock('../../components/FollowListPanel', () => ({ default: () => <div /> }))
 vi.mock('../../components/ReportButton', () => ({ default: () => <button type="button">Reportar perfil</button> }))
+vi.mock('../../components/BlockButton', () => ({ default: () => <button type="button">Bloquear usuario</button> }))
 
 const mockedGetProfile = vi.mocked(getProfileByUser)
 const profile = {
@@ -48,7 +52,10 @@ describe('DeveloperProfilePage', () => {
     expect(screen.getByText('I build useful software.')).toBeInTheDocument()
     expect(screen.getByText('TypeScript')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Seguir' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Enviar mensaje' })).toHaveAttribute('href', '/messages/user-2')
+    await userEvent.setup().click(screen.getByRole('button', { name: /más/i }))
     expect(screen.getByRole('button', { name: 'Reportar perfil' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Bloquear usuario' })).toBeInTheDocument()
     expect(mockedGetProfile).toHaveBeenCalledWith('user-2', expect.any(AbortSignal))
   })
 
