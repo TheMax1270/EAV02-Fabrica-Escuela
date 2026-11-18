@@ -202,7 +202,15 @@ jobs:
           RESP_S=$(curl -s -u "$SONAR_TOKEN:" \
             "$API/issues/search?componentKeys=$PROJECT_KEY&$SCOPE&severities=MINOR,MAJOR,CRITICAL,BLOCKER&resolved=false&facets=severities&ps=1")
           SEV=$(echo "$RESP_S" | jq -r '.total // "N/A"')
-          SEV_DETAIL=$(echo "$RESP_S" | jq -r '[.facets[]? | select(.property=="severities") | .values[] | select(.count > 0) | "\(.val | ascii_downcase)=\(.count)"] | join(" · ")')
+          case "$SEV" in
+            ''|*[!0-9]*) SEV_DETAIL="desglose no disponible" ;;
+            *) SEV_DETAIL=$(echo "$RESP_S" | jq -r '
+              [.facets[]? | select(.property=="severities") | .values[]? |
+                {key: (.val | ascii_downcase), value: .count}] | from_entries as $counts |
+              ["minor", "major", "critical", "blocker"] |
+                map(. as $severity | "\($severity)=\($counts[$severity] // 0)") | join(" · ")
+            ') ;;
+          esac
 
           ok()  { echo "✅"; }
           bad() { echo "❌"; }
@@ -216,7 +224,7 @@ jobs:
             SEV_META="≤ $MAX_FINDINGS"
           else
             SEV_S="ℹ️"
-            SEV_META="informativo"
+            SEV_META="informativo (no bloquea)"
           fi
 
           {
