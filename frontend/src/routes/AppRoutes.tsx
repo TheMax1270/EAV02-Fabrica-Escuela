@@ -13,6 +13,7 @@ import DeveloperProfilePage from '../pages/DeveloperProfilePage'
 import AdminModerationPage from '../pages/AdminModerationPage'
 import MessagesPage from '../pages/MessagesPage'
 import NotificationsPage from '../pages/NotificationsPage'
+import AdminStatisticsPage from '../pages/AdminStatisticsPage'
 
 export default function AppRoutes() {
   return (
@@ -26,6 +27,7 @@ export default function AppRoutes() {
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="/admin/users" element={<ProtectedRoute role="ADMIN"><AdminUsersPage /></ProtectedRoute>} />
       <Route path="/admin/reports" element={<ProtectedRoute role="ADMIN"><AdminModerationPage /></ProtectedRoute>} />
+      <Route path="/admin/statistics" element={<ProtectedRoute role="ADMIN"><AdminStatisticsPage /></ProtectedRoute>} />
       <Route path="/projects" element={<ProtectedRoute><MyProjectsPage /></ProtectedRoute>} />
       <Route path="/developers/:userId" element={<DeveloperProfilePage />} />
       <Route path="/messages/:userId?" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />

@@ -734,3 +734,110 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--cyan); outline-
   .notification-item { grid-template-columns: auto 1fr; }
   .notification-item time { grid-column: 2; }
 }
+
+.statistics-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  align-items: end;
+  gap: 16px;
+  margin-top: 32px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.statistics-filters .form-field, .statistics-metric-filter { min-width: 0; margin-bottom: 0; }
+.statistics-filters input, .statistics-filters select, .statistics-metric-filter select {
+  width: 100%;
+  min-height: 45px;
+  padding: 10px 12px;
+  border: 1px solid #525c6b;
+  border-radius: var(--radius-sm);
+  outline: none;
+  color: var(--text);
+  background: #171b22;
+}
+.statistics-filters input:focus-visible, .statistics-filters select:focus-visible,
+.statistics-metric-filter select:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(170, 155, 255, .2);
+}
+.statistics-submit { white-space: nowrap; }
+.statistics-error { margin-top: 20px; }
+.statistics-loading { margin-top: 24px; }
+.statistics-results { margin-top: 28px; }
+.statistics-range { margin: 0 0 16px; color: var(--muted); font-size: .88rem; }
+.statistics-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.statistics-card {
+  min-width: 0;
+  padding: 21px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-panel);
+}
+.statistics-card h2 { margin: 0; color: var(--muted); font-size: .82rem; font-weight: 650; line-height: 1.4; }
+.statistics-card p { margin: 13px 0 0; color: #fff; font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 760; }
+.statistics-empty { margin: 18px 0 0; color: var(--muted); }
+.statistics-panel {
+  margin-top: 22px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-panel);
+}
+.statistics-panel-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; }
+.statistics-panel-heading h2 { margin: 0; font-size: 1.2rem; }
+.statistics-panel-heading p { margin: 7px 0 0; color: var(--muted); font-size: .86rem; }
+.statistics-metric-filter { width: min(100%, 240px); }
+.statistics-metric-filter select { display: block; }
+.statistics-chart { margin: 24px 0 0; }
+.statistics-chart-scroll { width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; }
+.statistics-chart-scroll:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+.statistics-chart-bars { display: flex; align-items: stretch; gap: 10px; min-height: 242px; }
+.statistics-chart-column {
+  display: flex;
+  flex: 1 0 54px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  min-width: 0;
+}
+.statistics-chart-value { color: #e8eaf0; font-size: .74rem; font-variant-numeric: tabular-nums; }
+.statistics-chart-track {
+  display: flex;
+  align-items: flex-end;
+  width: 26px;
+  height: 150px;
+  overflow: hidden;
+  border-radius: 5px 5px 0 0;
+  background: #171b22;
+}
+.statistics-chart-bar {
+  width: 100%;
+  border-radius: 5px 5px 0 0;
+  background: linear-gradient(180deg, var(--cyan), var(--accent-strong));
+}
+.statistics-chart-period { max-width: 70px; color: var(--muted); font-size: .69rem; text-align: center; }
+.statistics-table-wrap { margin-top: 24px; overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); }
+.statistics-table { min-width: 620px; }
+.statistics-table th:first-child, .statistics-table td:first-child { white-space: nowrap; }
+.statistics-table tbody th { color: var(--text); font-weight: 600; text-transform: none; letter-spacing: 0; }
+.statistics-table td { font-variant-numeric: tabular-nums; }
+@media (max-width: 900px) {
+  .statistics-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .statistics-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 620px) {
+  .statistics-filters { grid-template-columns: 1fr; padding: 18px; }
+  .statistics-submit { width: 100%; }
+  .statistics-panel { padding: 18px; }
+  .statistics-panel-heading { align-items: stretch; flex-direction: column; gap: 18px; }
+  .statistics-metric-filter { width: 100%; }
+  .statistics-chart-bars { min-height: 220px; }
+}
+@media (max-width: 380px) {
+  .statistics-cards { grid-template-columns: 1fr; }
+}
